@@ -17,7 +17,12 @@ import feign.Logger;
 @EnableDiscoveryClient
 @EnableFeignClients
 public class UserServiceApplication {
-	
+
+
+
+
+
+
 	// 여기서 등록된 빈들은 다른 객체에서 주입받아서 사용한다. IOC 좋구먼
 
     public static void main(String[] args) {
