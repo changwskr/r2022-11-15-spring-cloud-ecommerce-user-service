@@ -1,0 +1,39 @@
+
+● http://localhost:xxxx/health_check
+	- 살았는지 죽었는 점검
+● http://localhost:xxxx/welcome
+	- application.xml에 정의한 greeting 메시지를 VO 와 Env를 활용해서 처리
+● user-service 기동 방법
+	- command 라인에서 실행
+	    - cd C:\WSJ_EX\01.workspace\2022-11-15-spring-cloud-ecommerce-user-service
+	    - mvn clean compile package -DskipTests=true
+		- mvn spring-boot:run
+● 데이타 베이스 연동
+	- jdbc drive 환경구성
+		- pom.xml dependency 처리
+	- application.xml 환경구성
+		datasource:
+    		driver-class-name: com.mysql.cj.jdbc.Driver
+		    url: jdbc:mysql://192.168.0.102:3306/ecommerce_db?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true&autoReconnect=true
+		    username: ecommerce
+		    password: ecommerce1234
+		  jpa:
+		    open-in-view: true
+		    hibernate:
+		      ddl-auto: update 			
+● http://localhost:xxxx/users (post) 회원가입
+{
+	"name": "AA",
+	"email": "AA@AA.COM",
+	"encryptedPwd": "1234"
+}
+	- class
+		RequestUser - Body의 내용을 저장, @NotNull @Size @Email 오노테이션을 이용해서 밸리데이션을 체킹하자
+		UserDto - 객체간 움직이는 데이타
+		UserEntity - 데이타베이스와 매핑되는 데이타
+			- userid는 UUID를 활용해 생성
+		UserService.createUser(UserDto)
+		ModelMapper 객체간 데이타 매핑
+		ResponseUser 객체 생성 - 클라이언트로 전송할 메시지 저장
+	- 데이타
+	

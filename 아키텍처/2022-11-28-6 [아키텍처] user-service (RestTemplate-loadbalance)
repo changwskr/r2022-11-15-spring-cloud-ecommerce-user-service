@@ -1,0 +1,19 @@
+
+
+여기서 중요하게 생각할 점은
+타서비스를 호출을 위해 resttemplate를 사용하고
+resttemplate에서 로드밸런스 기능을 활성화 하기 위해 @loadbalanced를 사용했다는 점이다.
+
+
+● 구현방법
+	- @LoadBalanced
+	- user-service.yml
+		order_service:
+		  url: http://ORDER-SERVICE/order-service/%s/orders
+		  url: http://127.0.0.1:8000/order-service/%s/orders  --> IP가 있으면 Loadbalcing을 하지 못한다.
+		  
+		  # case1. 로드밸런서를 api게이트웨이 맡길경우 @LoadBalanced 선언되면 에러가 발생
+		  #  url: http://127.0.0.1:8000/order-service/%s/orders
+		  # case2. 로드밸런서를 호출하는 템플릿에서 할 경우, 이경우에는 @LoadBalanced 가 선언되어야 된다,.
+		  
+		

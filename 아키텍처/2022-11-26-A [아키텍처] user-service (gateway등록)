@@ -1,0 +1,53 @@
+● 게이트웨이 라우팅 등록
+
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/**
+        - id: catalog-service
+          uri: lb://CATALOG-SERVICE
+          predicates:
+            - Path=/catalog-service/**
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order-service/actuator/**
+            - Method=GET,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/order-service/(?<segment>.*), /$\{segment}
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order-service/**
+            
+● 확인을 위한 포트를 넣어둔다.            
+	@GetMapping("/health_check")
+    @Timed(value="users.status", longTask = true)
+    public String status() {
+        return String.format("It's Working in User Service"
+                + ", port(local.server.port)=" + env.getProperty("local.server.port")
+                + ", port(server.port)=" + env.getProperty("server.port") <<<<<<<<<<<<<<<<<<<<<<<<
+                + ", gateway ip=" + env.getProperty("gateway.ip")
+                + ", message=" + env.getProperty("greeting.message")
+                + ", token secret=" + env.getProperty("token.secret")
+                + ", token expiration time=" + env.getProperty("token.expiration_time"));
+    }            
+
+● 게이트웨이에 등록한 user-service의 태그를 기준으로 한 rest uri를 정의한다.           
+          routes:
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/**
+	클라이언트에서 부터 user-service를 가지고 오는 구조이다.
+	그러니 request mapping에도 기존 "/"에서 "/user-service"로 변경해야 된다.
+	예) @GetMapping("/health_check") -> @GetMapping("/user-service/health_check")
+	
+	user-service 부분을 controller의 공통으로 올린다. 
+	 @RequestMapping("/user-service")
+	public class UserController {       
+    

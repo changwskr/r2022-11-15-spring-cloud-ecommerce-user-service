@@ -1,0 +1,37 @@
+● spring Security
+	- 목적은 인증과 권한을 처리하기 위해 적용한다.
+● 적용절차
+	(com.example.userservice.security)
+		: public class WebSecurity extends WebSecurityConfigurerAdapter { } 
+		
+	- spring security jar 의존성 추가
+		: <artifactId>spring-boot-starter-security</artifactId>
+		
+	- WebSecurityConfigurerAdapter를 상속한 Security Configuration 클래스 생성
+		: WebSecurity extends WebSecurityConfigurerAdapter
+		
+	- Security Configuration 클래스에 @EnableWebSecurity 추가한다.
+	
+	- 인증 Authentication 처리를 위해 configure(AuthenticationManagerBuilder auth) 메서드 재정의
+		WebSecurity.configure(AuthenticationManagerBuilder auth)
+		
+	- Authorization 처리를 위한configure(HttpSecurity http) 재정의
+		WebSecurity.configure(HttpSecurity http) 
+
+		http.authorizeRequests().antMatchers("/actuator/**").permitAll();
+		http.authorizeRequests().antMatchers("/health_check/**").permitAll();
+		http.authorizeRequests().antMatchers(PERMIT_URL_ARRAY).permitAll();
+
+	- Password encode를 위한 BCryptPasswordEncoder 빈정의
+		: UserServiceImpl에 BCryptPasswordEncoder
+			BCryptPasswordEncoder passwordEncoder은 아직 빈으로 등록된 적이 없다. 기동 클래스에서 빈드로 말들자
+		
+			Application.java
+			@Bean  
+    		public BCryptPasswordEncoder passwordEncoder() {
+        		return new BCryptPasswordEncoder();
+    		}
+		 
+		
+	
+		

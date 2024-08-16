@@ -1,0 +1,33 @@
+
+
+@Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ResponseUserFormVO {
+    private String email;
+    private String name;
+    private String userId;
+
+    private List<ResponseOrderFormVO> orders;
+}
+JsonInclude(JsonInclude.Include.NON_NULL) 의 사용은 객체의 필드가 널이면 전송하지 않겠다는 의미이다.
+
+
+@Data
+public class ResponseOrderFormVO {
+    private String productId;
+    private Integer qty;
+    private Integer unitPrice;
+    private Integer totalPrice;
+    private Date createdAt;
+
+    private String orderId;
+}
+
+public interface UserServiceAS extends UserDetailsService {
+    ...
+    UserDto getUserByUserId(String userId);
+    Iterable<UserEntity> getUserByAll();
+ 	...
+}
+
+

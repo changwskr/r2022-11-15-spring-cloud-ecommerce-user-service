@@ -1,0 +1,79 @@
+
+1.-------
+Application.java에 빈을 하나 등록한다.
+   @Bean
+    @LoadBalanced
+    public RestTemplate getRestTemplate() {
+        return new RestTemplate();
+    }
+    
+2.------
+UserService에 적용해 본다.
+
+    @Override
+    public UserDto getUserByUserId(String userId) {
+		....
+        /* Using as rest template */
+        String orderUrl = String.format(env.getProperty("order_service.url"), userId);
+        ResponseEntity<List<ResponseOrder>> orderListResponse =
+                restTemplate.exchange(orderUrl, HttpMethod.GET, null,
+                                            new ParameterizedTypeReference<List<ResponseOrder>>() {
+                });
+        List<ResponseOrder> ordersList = orderListResponse.getBody();
+		......
+		
+        userDto.setOrders(ordersList);
+
+        return userDto;
+    }
+    
+    exchange(url,GET,requestEntity,받아오고자하는 데이타타입)
+3.-------
+user-service.yml 파일에 
+    env.getProperty("order_service.url")의 내용을 등록한다.
+    order_service:
+      url: http://127.0.0.1:8000/order-service/%s/orders
+      http://127.0.0.1:8000/order-service/58637473-1c45-463e-8378-f9eb09cb279c/orders
+4.--------
+확인절차
+(get) http://127.0.0.1:8000/user-service/users/userId
+
+5.--------
+확인사항 : 단순한 템플릿을 이용해서 오더서비스를 할경우는 다음과 같이 해주어야 된다. 
+    @Bean
+    public RestTemplate getRestTemplate() {
+        return new RestTemplate();
+    }
+
+user-service.yml
+    order_service:
+      url: http://127.0.0.1:8000/order-service/%s/orders
+      
+      환경변경이후 호출한다.
+  http://localhost:8000/user-service/actuator/busrefresh
+
+6.--------
+확인사항 : 만약 템플랫에 로드밸런싱 기능을 넣을때는 다음과 같이 해주어야 된다. 
+    @Bean
+    @LoadBalanced
+    public RestTemplate getRestTemplate() {
+        return new RestTemplate();
+    }
+  
+  user-service.xml 설정값 변경
+    order_service:
+      url: http://ORDER-SERVICE/order-service/%s/orders
+      
+  환경 변경이후 다음을 호출한다.
+  http://localhost:8000/user-service/actuator/busrefresh
+      
+ 당연히 이렇게 되어야 된다.
+ EUREKA를 이용해야 되니깐      
+
+제거하고 하면 에러는 나지 않는다.
+
+
+    
+    
+      
+    

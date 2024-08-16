@@ -1,0 +1,86 @@
+# 회원가입
+post /users/
+
+pom.xml 수정
+#-----------------------------------------------------------------------------------------------------------------------
+JPA 아키텍처의 특징
+    SQL - JPA - Hibernate - JDBC - DBMS
+    SQL - HNA - Hiberbate - JDBC - DBMS
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+자바소스 수정
+#-----------------------------------------------------------------------------------------------------------------------
+public class RequestUser {
+
+    /**
+     * 이 정보 RequestBody 정보에 대한 매핑 정보를 관리하는 것
+     * 어노테이션을 사용해서 데이타에 대한 무결성을 확인할 수 도 있다.
+     */
+    @NotNull(message = "Email cannot be null")
+    @Size(min = 2, message = "Email not be less than two characters")
+    @Email
+    private String email;
+
+    @NotNull(message = "Name cannot be null")
+    @Size(min = 2, message = "Name not be less than two characters")
+    private String name;
+
+    @NotNull(message = "Password cannot be null")
+    @Size(min = 4, message = "Password must be equal or grater than 8 characters")
+    private String pwd;
+}
+
+
+application.yml 작성
+#-----------------------------------------------------------------------------------------------------------------------
+spring
+  datasource:
+    url: jdbc:h2:mem:h6db
+    driver-class-name: org.h2.Driver
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      use-new-id-generator-mappings: false
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+
+
+
+modelMapper 객체사용
+#----------------------------------------------------------------------------------------------------------------------
+모델매퍼는 RequestUser 객체를 UserDto객체로 UserEntity 객체 변환해 주는 역할을 해주는 객체이다.
+즉 RequestUser 객체를 UserEntity 객체로 변화해 준다. (다있네)
+
+        pom.xml 추가
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>2.3.8</version>
+		</dependency>
+
+자바소스는 UserController에서 다음과 같이 사용한다.
+    @PostMapping("/users")
+    public ResponseEntity<ResponseUser> createUser(@RequestBody RequestUser user) {
+
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+        // mapper를 통해서 매핑
+        UserDto userDto = mapper.map(user, UserDto.class);
+
+요청방법
+#-----------------------------------------------------------------------------------------------------------
+requestBody에 다음을 json 타입으로 넘기면 된다. parameter를 넘겨서는 안된다.
+{
+    "name": "lee dowon",
+	"email" : "dowon0623@gmail.com",
+	"pwd": "1234"
+}

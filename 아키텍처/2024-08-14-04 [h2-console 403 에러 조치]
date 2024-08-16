@@ -1,0 +1,19 @@
+public class WebSecurity extends WebSecurityConfigurerAdapter {
+    private UserService userServiceAS;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private Environment env;
+
+    private static final String[] PERMIT_URL_ARRAY = {
+            /* swagger v2 */
+            "/v2/api-docs",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui.html",
+            "/webjars/**",
+            /* swagger v3 */
+            "/v3/api-docs/**",
+            "/h2-console/**",  ----------------->>> 등록해줌
+            "/swagger-ui/**"
+    };

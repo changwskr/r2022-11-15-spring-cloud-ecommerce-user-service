@@ -1,0 +1,85 @@
+
+RestTemplate보다는 직관적이다.
+
+Load Balanced 을 지원한다.
+
+FeignClient를 활용하기 위해서는 pom.xml 파일과 main 프로그램에 feign 사용여부에 대한
+이니셜을 남겨둔다.
+실제 호출을 위한 인터페이스를 작성하게 되는데
+@FeignClient 라는 어노테이션과 실제 호출해야 되는 url에 대한 매핑 작업을 하면 된다.
+
+● POM.XML
+	- openfeign 추가
+	   <dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
+● User-Service Main.java
+	- @EnableFeignClients 추가 
+	@EnableFeignClients
+	public class Application {
+	}
+	
+● 인터이스 명시
+	// 요청하고자 하는 서비스 명시
+	@FeignClient(name="order-service")
+	public interface OrderServiceClient {
+	
+		// 요청하고자 하는 서비스 형식 명시
+	    @GetMapping("/order-service/{userId}/orders")
+	    List<ResponseOrder> getOrders(@PathVariable String userId);
+	
+	}
+
+● UserServiceImpl.java
+	- OrderServiceClient 빈을 인젝션 받아서 사용한다.
+		. 생성자에 선언
+	- 사용방식
+		List<ResponseOrder> orderList = orderServiceClient.getOrders(userId)
+		userDto.setOrders(orderList);
+
+● 예외처리 관련
+	두가지의 예외처리 방식을 제공한다.
+	- FeignException을 직접 try-catch 하거나 FeignErrDecoder를 이용하여 예외를 처리한다.
+	- try ~ catch
+		. FeignException
+	- FeignErrDecoder
+		. 이 경우에는 try ~ catch 없이 그냥 명시만 하면 된다.
+		. decode 메소드가 구현되어 있는데
+			이 메소드가 에러의 상태를 명시되어 있다.
+		. user-service.yml
+			order_service 관련된 내용에 예외 내용을 명시해보자
+			order_service:
+			  exception:
+				    order_is_empty: User's orders is empty.(#####)
+
+		public class FeignErrorDecoder implements ErrorDecoder {
+		    Environment env;
+		    @Autowired
+		    public FeignErrorDecoder(Environment env) {
+		        this.env = env;
+		    }
+			public FeignErrorDecoder() {
+				// TODO Auto-generated constructor stub
+			}
+		
+			@Override
+		    public Exception decode(String methodKey, Response response) {
+		        switch(response.status()) {
+		            case 400:
+		                break;
+		            case 404:
+		                if (methodKey.contains("getOrders")) {
+		                    return new ResponseStatusException(HttpStatus.valueOf(response.status()),
+		                            env.getProperty("order_service.exception.orders_is_empty")); // user-service.yml
+		                }
+		                break;
+		            default:
+		                return new Exception(response.reason());
+		        }
+		
+		        return null;
+		    }
+		}
+				
+			

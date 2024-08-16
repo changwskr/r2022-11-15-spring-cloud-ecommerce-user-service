@@ -1,0 +1,42 @@
+
+● 유레카 등록
+	- @EnableDiscoveryClient 설정
+		main
+
+● 환경구성
+	- 다양한 포트로 기동될수 있게 해주오
+		server.port=0
+	- 유레카 등록시 인스턴스 작업
+		eureka.instance.instance-id=${spring.cloud.client.ip-address}:${spring.application.instance_id:${random.value}}
+	- 유레카 서버 등록
+		eureka.client.server-url.defaultZone=http://localhost:8761/eureka
+	- welcome 메시지 추가
+		greeting.message=welcome to the simple ecommerce
+			- 이 welcome 메시지를 어떻게 사용하나
+				- 코드에서 Envrionment env를 이용해서 본다. env.getProperty("greeting.message")
+
+● 자바코드
+	- controller
+		- @Autowired 을 통해 Bean 작업을 실시
+	- 상태체크: /health_check
+	- 만약 application.xml 파일에 정의된 value를 참조하고자 할때
+		- 설정
+		public class Greeing {
+			@value("${greeting.message}")
+			private String message;
+		}
+		
+		- 사용처		
+		@Autowired
+		private Greeting greeting;
+		
+		이 방법을 사용하던가 아니면 env.getProperty("greeting.message")을 이용해 본다.
+	
+	
+● 실행
+	- http://localhost:8000/users/health_check
+	
+● 기타
+	jar 파일로 패키징을 하게되면 java main을 통해서 기동이 가능하나
+	war 파일로 패킹하면 어플리케이션 구성자체가 web에 맞추어져 기동이 안된다. war의 경우에는 내장 미들웨어가 없다
+	

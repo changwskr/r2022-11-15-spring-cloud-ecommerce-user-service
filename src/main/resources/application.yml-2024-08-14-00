@@ -1,0 +1,109 @@
+server:
+  port: 0
+
+
+
+
+
+spring:
+  application:
+    name: user-service
+
+  # ---------------------------------------------------------- config server 연동
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
+  # ---------------------------------------------------------- monitoring
+  zipkin:
+    base-url: http://127.0.0.1:9411
+    enabled: true
+  sleuth:
+    sampler:
+      probability: 1.0
+  # ---------------------------------------------------------- backing
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+      path: /h2-console
+# ----------------------------------------------------------
+
+# [2022-11-17] 데이타베이스 암호영역으로 config-server를 통해서 인젝션 받는다.
+# 위치는 config-server의 환경정보를 저장하는 native영역이다. 2022-11-17-spring-cloud-config-native-repository
+# 막고 옮긴다.
+# 2022-11-28-2 막고 옮긴다 user-service.xml
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+##    url: jdbc:mysql://mysql:3306/ecommerce_db?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true&autoReconnect=true
+#    url: jdbc:mysql://192.168.0.102:3306/ecommerce_db?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true&autoReconnect=true
+#    username: ecommerce
+#    password: ecommerce1234
+# 끝
+
+  datasource:
+    url: jdbc:h2:mem:h6db
+
+
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      use-new-id-generator-mappings: false
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+  #---------------------------------------------------------- restapi helper
+  mvc:
+    # ----------------------------------------------------------
+    # swaagger 설정 변경
+    # http://localhost:8002/swagger-ui.html
+    pathmatch:
+      matching-strategy: ant-path-matcher
+
+#---------------------------------------------------------- spring end
+eureka:
+  instance:
+    hostname: localhost
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.name}:${spring.application.instance_id:${random.value}}
+#    prefer-ip-address: true
+#    ip-address: ${server.address}
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+#---------------------------------------------------------- general
+greeting:
+  message: Welcome to the Simple E-commerce.
+logging:
+  level:
+    com.example.userservice: DEBUG
+
+#---------------------------------------------------------
+# 2022-11-17 config-service 도입으로 인해 막는다. 다음의 정보는 ecommerce.yml를 통해서 인젝션 받는다.
+# 2022-11-27-8 : config-service를 활성화 안해서 다시 개방한다.
+# 2022-11-27-D : config-service를 활성화 하고 막는다. 이내용은 ecommerce.yml로 이전한다.
+#---------------------------------------------------------
+#token:
+#  expiration_time: 86400000
+#  secret: user_token
+# 끝
+
+# ----------------------------------------------
+# spring acturator 기능
+# 환경정보 변경시 재기동이 아닌 환경변경 부분을 엔진에 적용하는 기능
+# 관련 파일 - application.yml, websecurity.configure()에 관련 내용 적용한다.
+#                - pom.xml에 dependency 기능 추가 actuator
+#----------------------------------------------
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans, busrefresh, info, metrics, prometheus        
+

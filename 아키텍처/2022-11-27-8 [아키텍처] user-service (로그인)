@@ -1,0 +1,280 @@
+로그인 요청 흐름
+	- AuthenticationFilter.attemptAuthentication()--start
+			auth.userDetailsService(userServiceAS) // 여기서 UserServiceImpl.loadUserByUsername()  요청한다.
+				   .passwordEncoder(bCryptPasswordEncoder);
+   	  AuthenticationFilter.attemptAuthentication()--end
+	 
+	- UserServiceImpl.loadUserByUsername()--start-CC@CC.COM
+	  UserServiceImpl.loadUserByUsername()--end-org.springframework.security.core.userdetails.User [Username=CC@CC.COM, Password=[PROTECTED], Enabled=true, AccountNonExpired=true, credentialsNonExpired=true, AccountNonLocked=true, Granted Authorities=[]]
+	  
+	- AuthenticationFilter.successfulAuthentication()--start
+      AuthenticationFilter.successfulAuthentication()--end
+
+로그인 처리를 위해서는
+  게이트웨이의 라우팅 기능 변경 application.xml
+  user-service에서 토큰을 생성하기 위한 환경 정보 application.xml
+  로그인 처리를 위한 authentication과 userservice를 재구현이 필요하다.
+        
+	
+------------------------------------[인증처리 관련]------------------------------------
+    // 실제 우리는 spring security의 login기능을 활용해서 처리를 한다.
+● 요청 
+(post) http://127.0.0.1:8000/user-service/login
+{
+	"email" : "AA@AA.COM",
+	"password": "1234"
+}
+
+● 구현 클래스
+	- 사용자정보 전달용 RequestLogin
+	- 인증처리 목적 AuthenticationFilter
+							- extends UsernamePasswordAuthencationFilter
+							- attemptAuthentication(), successfulAuthentication() 함수구현
+	이 두가지를 이용해서 로그인 처리를 하고자 한다.
+	- 인증 처리를 위해
+		토큰방식을 이용해서 처리한다. 이 값은 email과 password를 이용해서 처리한다.
+		인증이 성공한다면 인증토큰값을 헤더에 저장해서 클라이언트로 반환한다. successful에서 처리한다.	
+	
+	public Authentication attemptAuthentication(HttpServletRequest request,
+                                                HttpServletResponse response) throws AuthenticationException {
+        try {
+        	System.out.println("########################## - AuthenticationFilter.attemptAuthentication()--start");
+        	
+        	// 전달되는 스트림을 찾아서 RequestLogin 객체로 전환시킨다.
+            RequestLogin creds = new ObjectMapper().readValue(request.getInputStream(), RequestLogin.class);
+            
+            // 토큰값으로 변경해서
+            UsernamePasswordAuthenticationToken token = 
+            		new UsernamePasswordAuthenticationToken(creds.getEmail(), creds.getPassword(),   new ArrayList<>());
+            // 인증작업을 요청한다.
+            
+        	System.out.println("########################## - AuthenticationFilter.attemptAuthentication()--end");
+            return getAuthenticationManager().authenticate(token);
+            
+        } catch(IOException e) {
+        	System.out.println("########################## - AuthenticationFilter.attemptAuthentication()--exception");
+            throw new RuntimeException(e);
+        }
+    }
+
+    /*
+     * 실제 성공을 했을때 어떻게 할 것인가를 정의한다.
+     * 여기서 토큰을 발행한다.
+     * 그리고 토큰을 클라이언트로 보낸다. 토큰값은 헤더에 저장되어진다.
+     * postman으로 확인하세요 header - token
+     */
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain chain,
+                                            Authentication authResult) throws IOException, ServletException {
+    	
+    	System.out.println("########################## - AuthenticationFilter.successfulAuthentication()--start");
+        String userName = ((User)authResult.getPrincipal()).getUsername();
+        System.out.println("#"+ userName + "]");
+        UserDto userDetails = userServiceAS.getUserDetailsByEmail(userName);
+        
+        // 토큰을 생성한다. - userName으로 userId를 찾아서 userid로 토큰을 생성한다.
+        String token = Jwts.builder()
+                .setSubject(userDetails.getUserId())
+                .setExpiration(new Date(System.currentTimeMillis() +
+                        Long.parseLong(env.getProperty("token.expiration_time"))))
+                .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
+                .compact();
+
+        // 토큰을 헤더에 저장한다.
+        response.addHeader("token", token);
+        response.addHeader("userId", userDetails.getUserId());
+        System.out.println("########################## - AuthenticationFilter.successfulAuthentication()--end");
+    }
+
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    WebSecurity.java의 configure에서 인증처리를 한다. 여기서 중요한 점은
+    현재 user-service에 저장된 패스워드는 암복호화 된 정보이다. 그런데 현재 configure 요청 시점의 패워드는 정보는 클라이언트에서 요청한
+    플레인텍스트여서 이것을 암호화로 바꾸어서 상호 같은지 비교하는 기능이 필요하다. 
+    그리고 또하나 중요한 사항은 인증을 하기 위한 UserService를 사용하고 있는데
+    spring의 인증을 위해서는 UserDetailsService를 상속해서 구현해야 된다.
+    그래서 user-service 인터페이스인 UserService에 상속을 시키고 UserServiceImpl에서 구현해서 사용한다.
+    public interface UserService extends UserDetailsService
+    실제 UserServiceImpl에서 구현한 상속 메소드는 loadUserByUsername::사용자한명의 정보 구한다. 이것이다. 
+    																 UserEntity userEntity = IUserRepositoryDAO.findByEmail(username);
+    
+    다시말해서
+    WebSecurity.configure(사용자정보) -> UserServiceImpl.loadUserByUsername(사용자정보:email)
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    	System.out.println("########################## - WebSecurity.configure()--start--AuthenticationManagerBuilder");
+        auth.userDetailsService(userServiceAS).passwordEncoder(bCryptPasswordEncoder);
+        System.out.println("########################## - WebSecurity.configure()--end--AuthenticationManagerBuilder");
+    }
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserEntity userEntity = IUserRepositoryDAO.findByEmail(username);
+
+        System.out.println("########################## - UserServiceImpl.loadUserByUsername()--start-" + username);
+
+        if (userEntity == null)
+            throw new UsernameNotFoundException(username + ": not found");
+
+        
+        User user = new User(userEntity.getEmail(), userEntity.getEncryptedPwd(),
+                true, true, true, true,
+                new ArrayList<>());
+        
+        System.out.println("########################## - UserServiceImpl.loadUserByUsername()--end-" + user);
+        
+        return user;
+	}
+    
+------------------------------------[인증처리 관련]--apigateway-application.xml 라우팅 정보 변경----------------------------------
+
+● 기존
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/**
+● 변경    
+
+  # 참고로 라우팅에서 어떻게 라우팅하라는 조건매칭을 predicates에서 처리한다.
+  # 예로 /user-service/login 이고 POST이면 유레카에 등록된 lb://USER-SERVICE을 요청하라는 조건이다.  
+  
+  # RewritePath=/user-service/(?<segment>.*), /$\{segment} 의 의미는 
+  # 만약 요청을 http://localhost:8000/user-service/welcome이라고 한다고 했을때
+  # 실제 전달값은 http://localhost:8000/welcome 만 전달하겠다는 말이다.
+  # 즉 패턴은 /user-service/(?<segment>.*) 여기에서 /user-service/(?< key >.*) 중 key를 제외하고 이것만 전달하겠다는 의미이다. /$\{segment}
+
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/login
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/users
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/actuator/**
+            - Method=GET,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/**
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            - AuthorizationHeaderFilter
+		# -----------------------------------------------------------------
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order-service/actuator/**
+            - Method=GET,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/order-service/(?<segment>.*), /$\{segment}            
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order-service/**
+		# -----------------------------------------------------------------
+        - id: catalog-service
+          uri: lb://CATALOG-SERVICE
+          predicates:
+            - Path=/catalog-service/actuator/**
+            - Method=GET,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/catalog-service/(?<segment>.*), /$\{segment}            
+        - id: catalog-service
+          uri: lb://CATALOG-SERVICE
+          predicates:
+            - Path=/catalog-service/**
+    
+    
+    							
+------------------------------------[권한처리 관련]------------------------------------
+● 개요
+	인증이 완료되면 권한에 대한 처리를 해준다.
+	주요 구현 클래스는 WebSucurity.java(configure)에서 해준다.
+● 구현
+
+	- IP에 대한 제약을 건다.
+	- 권한 필터를 적용해서 처리한다.WebSecurity.getAuthenticationFilter()
+	
+    /*
+     * 권한정의 작업을 실시한다.
+     * 라우팅에 대한 정보를 여기서 정의가 가능하다.
+     * 지금은 application.yml에 정의된것을 사용한다.
+     */
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+    	
+    	System.out.println("##권한을 넣는다.####################### - WebSecurity.configure()--start");
+        http.csrf().disable();
+
+        /*
+         * 권한 1차 통과 적용
+         */
+		http.authorizeRequests().antMatchers("/actuator/**").permitAll();
+		http.authorizeRequests().antMatchers("/health_check/**").permitAll();
+		http.authorizeRequests().antMatchers(PERMIT_URL_ARRAY).permitAll();		
+		http.authorizeRequests().antMatchers("/swagger-resources/**").permitAll();
+		
+		 
+        /*
+         *  권한 2차 통과 적용 
+         */
+         http.authorizeRequests().antMatchers("/users/**").permitAll();
+
+        /*
+         *  2case. 제약조건을 걸어보자
+         *  결론 127.0.0.1 인 IP만을 인증할것이고. 추가로 getAuthenticationFilter()에 결려있는 필터를 적용해 주세요
+         *  192.168.0.8로 하니깐 에러가 발생하는데 127로 하니 에러는 발생하지 않네 
+         */        		
+      http.authorizeRequests().antMatchers("/**")
+      				.hasIpAddress("127.0.0.1") // IP에 대한 제약을 걸어보자
+      				.and()
+      				.addFilter(getAuthenticationFilter()); //WebSecurity.getAuthenticationFilter() 함수를 만들어 필터작용을 한다.      
+
+
+        http.headers().frameOptions().disable();
+        
+        System.out.println("########################## - WebSecurity.configure()--end");
+    }
+    
+
+------------------------------------[인증처리 관련]--user-service-application.xml  변경----------------------------------
+토큰정보를 활성화 시킨다.
+토큰 관련 정보를 config-service를 도입하면 별도 공간으로 들어간다.
+만약 config-service가 오면 config-service를 통해서 관련 토큰정보 위치를 확인한다.    
+#---------------------------------------------------------
+# 2022-11-17 config-service 도입으로 인해 막는다.
+# 다음의 정보는 ecommerce.yml를 통해서 인젝션 받는다.
+#---------------------------------------------------------
+token:
+  expiration_time: 86400000
+  secret: user_token
+# 끝
+    

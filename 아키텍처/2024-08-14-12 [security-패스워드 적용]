@@ -1,0 +1,87 @@
+
+spring security 클래스를 이용한다
+1. spring security jar를 pom에 추가한다.
+2. websecurityconfigureAdapter를 상속받는 security configuration 클래스 생성
+3. secuity configuration 클래스에 @EnableWbsecurity 추가
+4. authenticatin -> configure(autehenticatinManagerBuilder auth) 메소스 생성
+5. password encode를 위한 BCryptPasswordEncoder 빈정의
+6. Authorization->Configure(HttpSecirity http) 메소드 재정의
+
+pom.xml 수정
+#-----------------------------------------------------------------------------------------------------------------------
+<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+
+자바소스 수정
+#-----------------------------------------------------------------------------------------------------------------------
+
+
+application.yml 작성
+#-----------------------------------------------------------------------------------------------------------------------
+
+
+
+BCryptPasswordEncoder 암호를 위해 사용하는 이 클래스는 다음과 같은 방식으로 등록한다.
+#-----------------------------------------------------------------------------------------------------------------------
+1. main class에서 빈으로 등록한다. 왜냐하면 이것을 빈으로 만드는 곳이 없어 main class에서 강제생성한다.
+public class UserServiceApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(UserServiceApplication.class, args);
+    }
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
+
+2. UserServiceASImpl에서 주입받는다.
+public class UserServiceASImpl implements UserServiceAS {
+    IUserRepositoryDAO IUserRepositoryDAO;
+    BCryptPasswordEncoder passwordEncoder;
+    UserServiceDC userServiceDC;
+
+    public UserServiceASImpl(IUserRepositoryDAO IUserRepositoryDAO,
+                             BCryptPasswordEncoder passwordEncoder, // passwordEncoder은 아직 빈으로 등록된 적이 없다. 기동 클래스에서 빈드로 말들자
+                             UserServiceDC userServiceDC,
+                             .....) {
+        this.IUserRepositoryDAO = IUserRepositoryDAO;
+        this.passwordEncoder = passwordEncoder;
+    ...
+}
+
+3. WebSecurity에서도 주입받는다.
+public class WebSecurity extends WebSecurityConfigurerAdapter {
+    private UserServiceAS userServiceAS;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    public WebSecurity(UserServiceAS userServiceAS, BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.env = env;
+        this.userServiceAS = userServiceAS;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    }
+    ....
+}
+
+public class UserServiceDC {
+    private IUserRepositoryDAO IUserRepositoryDAO;
+    BCryptPasswordEncoder passwordEncoder;
+
+    public UserServiceDC(IUserRepositoryDAO IUserRepositoryDAO, BCryptPasswordEncoder passwordEncoder) {
+        this.IUserRepositoryDAO = IUserRepositoryDAO;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public UserDto insertUser(UserDto userDto) {
+        userDto.setUserId(UUID.randomUUID().toString());
+
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+        UserEntity userEntity = mapper.map(userDto, UserEntity.class);
+      ★ userEntity.setEncryptedPwd(passwordEncoder.encode(userDto.getPwd()));
+    ...
+ }
+

@@ -1,0 +1,52 @@
+
+● 1차 - 먼저 게이트웨이를 통과하지 않고 정상로그인 되는지 확인한다.
+
+	http://127.0.0.1:65467/login (post)
+	{
+	"email" : "AA@AA.COM",
+	"password": "1234"
+	}
+	
+	
+	http://127.0.0.1:65467/user-service/login (post) 은 할수 없다.
+	apigateway에서 필터링해서 소스에서 user-service 라우팅 정보 삭제
+	
+	토큰값이 생성되었는지 확인한다.
+	
+	
+● 2차 - 게이트웨이를 통해서 로그인 한다.
+	http://127.0.0.1:8000/user-service/login (post)
+	
+● 로그인 절차 흐름
+	- 	http://127.0.0.1:8000/user-service/login (post)
+		{
+			"email" : "AA@AA.COM",
+			"password": "1234"
+		}
+	- AuthenticationFilter
+		attemptAuthentication(){
+			토큰생성
+            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(creds.getEmail(), creds.getPassword(),   new ArrayList<>());
+      }
+	- UsernamePasswordAuthenticationToken token
+	- UserDetailService
+		loadUserByUsername()
+			- UserRepository
+				findByEmail()
+	- AuthenticationFilter
+		successfulAuthencation()
+			- UserService
+				getUserDeatilByEmail()
+				
+	
+● JWT (jason web token)
+	과거의 web에서 사용하든 세션과 쿠키를 대처한 것이다.
+	java 진영에서는 세션등로 처리가 가능하나 다양한 채널에 대한 인증처리를 위한 JWT가 필요하게 되었다.
+	
+	JWT를 통해서 토큰을 생성하기 위해 세션과 마찬가지로 키가 필요하다.
+	이것은 application.xml에 정의해 놓고 사용한다. config-server 도입되면 외부환경으로 바꾼다.
+	
+	https://jwt.io/
+	
+	
+	

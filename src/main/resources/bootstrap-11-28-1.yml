@@ -1,0 +1,9 @@
+spring:
+  cloud:
+    config:
+      uri: http://127.0.0.1:8888
+      name: config-service      
+
+# 2022-11-28-1 spring-bus 적용으로 사용을 안한다
+#  profiles:
+#    active: dev

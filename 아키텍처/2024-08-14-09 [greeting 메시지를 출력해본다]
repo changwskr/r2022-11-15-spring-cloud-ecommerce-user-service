@@ -1,0 +1,63 @@
+자바소스 수정
+#-----------------------------------------------------------------------------------------------------------------------
+public class UserController {
+    private Environment env;
+
+    @Autowired // 빈주입
+    public UserController(Environment env, UserService userServiceAS) {
+        this.env = env;
+        this.userServiceAS = userServiceAS;
+    }
+
+    @GetMapping("/health_check")
+    @Timed(value="users.status", longTask = true)
+    public String status() {
+        return String.format("It's Working in User Service"
+                + ", port(local.server.port)=" + env.getProperty("local.server.port")
+                + ", port(server.port)=" + env.getProperty("server.port")
+                + ", gateway ip=" + env.getProperty("gateway.ip")
+                + ", message=" + env.getProperty("greeting.message")
+                + ", token secret=" + env.getProperty("token.secret")
+                + ", token expiration time=" + env.getProperty("token.expiration_time"));
+    }
+
+    	 * 2022-11-26-8-2
+    	 * 그리팅 메시지를 출력해주세요
+    	 * http://localhost:xxxx/welcome
+    	 */
+        @GetMapping("/welcome")
+        @Timed(value="users.welcome", longTask = true)
+        public String welcome(HttpServletRequest request, HttpServletResponse response) {
+    //        Cookie[] cookies = request.getCookies();
+    //        if (cookies != null) {
+    //            Arrays.stream(cookies).forEach(cookie -> {
+    //                System.out.print(cookie.getName() + "=" + cookie.getValue());
+    //            });
+    //        }
+    //        Cookie c1 = new Cookie("myuser_token", "abcd1234");
+    //        response.addCookie(c1);
+    //        return env.getProperty("greeting.message");
+
+        	// 2022-11-26-8-2 실제 env를 통해서 접근
+        	//return env.getProperty("greeting.message");
+
+        	// 2022-11-26-8-3 com.example.userservice.vo.Greeting을 이용하여 환경파일의 정보 출력
+        	// 이것은 @value를 통해서 가져온다.
+        	// return greeting.getMessage();
+        }
+
+}
+
+public class Greeting {
+    @Value("${greeting.message}")
+    private String message;
+}
+
+
+application.yml 작성
+#-----------------------------------------------------------------------------------------------------------------------
+greeting:
+  message: Welcome to the Simple E-commerce.
+logging:
+  level:
+    com.example.userservice: DEBUG

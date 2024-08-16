@@ -1,0 +1,63 @@
+(apigateway) pom.xml 등록
+#-------------------------------------------------------------------------------------------------------
+spring:
+  application:
+    name: apigateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/**
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            - AuthorizationHeaderFilter
+
+
+
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/login
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie # 헤더에 있는 쿠키정보는 제거하자
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/users
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/actuator/**
+            - Method=GET,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+
+
+
+프로그램 수정 @RequestMapping("/user-service") 추가
+#-------------------------------------------------------------------------------------------------------
+@RestController
+@RequestMapping("/user-service")
+public class UserController {
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+....
+    @GetMapping("/health_check")
+    @Timed(value="users.status", longTask = true)
+    public String status() {
+
+    }
+}
+
+
+

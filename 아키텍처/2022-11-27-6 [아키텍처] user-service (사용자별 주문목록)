@@ -1,0 +1,20 @@
+
+● 사용자 개별 주문 목록 
+	1) 개별 주문목록    
+		   get http://127.0.0.1:8000/user-service/users/230f7f26-18ca-404e-94a3-5083149a12e4
+		   		get http://127.0.0.1:8000/order-service/230f7f26-18ca-404e-94a3-5083149a12e4/orders
+   
+	2) 서비스 런타임 아키텍처
+			get http://127.0.0.1:8000/user-service/users/230f7f26-18ca-404e-94a3-5083149a12e4
+		   사용자 - controller - userServiceAS.getUserByUserId(userId)
+   
+   									- 	* 1) Rest Template
+         								* 2) Feign Client
+         								* 3) Circuit Braker      								
+         								
+         								get http://127.0.0.1:8000/order-service/230f7f26-18ca-404e-94a3-5083149a12e4/orders         								
+         										- ("/{userId}/orders")
+         											orderService.getOrdersByUserId(userId)
+         											
+
+         											

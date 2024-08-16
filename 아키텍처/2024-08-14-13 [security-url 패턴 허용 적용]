@@ -1,0 +1,40 @@
+spring security 클래스를 이용한다
+1. spring security jar를 pom에 추가한다.
+2. websecurityconfigureAdapter를 상속받는 security configuration 클래스 생성
+3. secuity configuration 클래스에 @EnableWbsecurity 추가
+4. authenticatin -> configure(autehenticatinManagerBuilder auth) 메소스 생성
+5. password encode를 위한 BCryptPasswordEncoder 빈정의
+6. Authorization->Configure(HttpSecirity http) 메소드 재정의
+
+pom.xml 수정
+#-----------------------------------------------------------------------------------------------------------------------
+<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+
+자바소스 수정
+#-----------------------------------------------------------------------------------------------------------------------
+
+
+application.yml 작성
+#-----------------------------------------------------------------------------------------------------------------------
+
+
+
+패턴에 대한 허용을 적용한다
+#-----------------------------------------------------------------------------------------------------------------------
+@Configuration
+@EnableWebSecurity
+@Slf4j
+public class WebSecurity extends WebSecurityConfigurerAdapter {
+    .....
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable();
+        http.authorizeRequests().antMatchers("/users/**").permitAll();
+        http.headers().frameOptions().disable();
+    }
+    .....
+}

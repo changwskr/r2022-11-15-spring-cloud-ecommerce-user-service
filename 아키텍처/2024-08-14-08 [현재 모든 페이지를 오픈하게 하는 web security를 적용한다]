@@ -1,0 +1,12 @@
+자바소스 수정
+#-----------------------------------------------------------------------------------------------------------------------
+@Configuration
+@EnableWebSecurity
+public class WebSecurity extends WebSecurityConfigurerAdapter {
+    private UserService userServiceAS;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private Environment env;
+
+    private static final String[] PERMIT_URL_ARRAY = {
+            "/**/**"   // 이 적용으로 모든 페이지는 오픈된다.
+    };

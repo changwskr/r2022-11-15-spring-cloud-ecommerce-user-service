@@ -1,0 +1,14 @@
+config-server의 적용으로 인해
+application.yml에서 token 정보관련한 내용을 제거한다.
+
+● 절차
+	- pom.xml
+		. spring-cloud-startet-config 적용
+		. spring-cloud-bootstrap 적용
+	- bootstrap.yml 추가
+		spring:
+		  cloud:
+		    config:
+		      uri: http://127.0.0.1:8888
+		      name: ecommerce      
+				

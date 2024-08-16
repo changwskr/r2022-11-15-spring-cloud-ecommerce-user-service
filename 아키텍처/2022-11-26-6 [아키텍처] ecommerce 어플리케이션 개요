@@ -1,0 +1,75 @@
+● 어플리케이션 서비스 (개요)
+	- user-service
+		: 사용자 조회-2-from 액터
+		: 로그인
+		: 사용자 등록
+		: 주문 확인-5-from 액터 to 6 : kafa-event-sourcing 이용
+	- order-service
+		: 주문 조회-6-from user-service
+		: 상품 주문-3-from 액터 to 4: kafka-sink-connector 이용
+	- catalog-service
+		: 상품조회-1
+		: 상품수량 업데이트-4 
+
+● 런타임 아키텍처
+	- 소스 관리 Git
+	- 환경구성 관리 sping-cloud-config
+		- Config server ~ spring bus ~ RabbitMQ ~ 마이크로 서비스 
+	- CI/CD 파이프라인 ~ push, pull
+	- Container 레지스트리 ~ deploy
+	- K8S 클러스터 ~Orchestration & Management
+		- Ingress Controller NGINX ~ container runtime
+			- Catalog-service : 5003
+			- User-service : 5001
+			- Order-service : 5002
+	- Backing Service
+		- Kafka
+			- Event Messing
+			- Sink Connector
+		- MySQL
+		- RabbitMQ		
+	- Monitoring
+		- zipkin
+		- prometheus
+		- grafana
+
+● ecommerce 런타임 아키텍처
+	- 소스 관리 Git
+	- 환경구성 관리 sping-cloud-config
+		- Config server ~ spring bus ~ RabbitMQ ~ 마이크로 서비스 
+	- CI/CD 파이프라인 ~ push, pull ~ 직접
+	- Container 레지스트리 ~ deploy ~ Docker Hub
+	- Service Registry ~ Eureka Service
+	- Runtime Gateway ~ Spring cloud gateway ~ 부하분산 라우팅 ~ Eureka 참조
+	- Ecommerce Service 
+		(springboot기반)		
+			- Catalog-service : 5003
+			- User-service : 5001
+			- Order-service : 5002
+				- inner
+					- controller rest
+					- service
+					- domain
+						- jpa orm
+	- Backing Service
+		- Kafka
+			- Event Messing
+			- Sink Connector
+		- MySQL
+		- RabbitMQ
+	- Monitoring
+		- zipkin
+		- prometheus
+		- grafana		
+	
+● ecommerce RESTFul API
+	- Catalog Service
+		- /catalog-service/catalogs : 상품 목록 제공 : GET
+	- User Service
+		- /user-service/users : 사용자 정보 등록 : POST
+		- /user-service/users : 사용자 정보 조회 : GET
+		- /user-service/users/{user_id} : 사용자 정보별 주문 내역 조회 : GET
+	- Order Service
+		- /order-service/users/{user_id}/orders : 주문 등록 : POST
+		- /order-service/users/{user_id}/orders : 주문 확인 : GET
+		

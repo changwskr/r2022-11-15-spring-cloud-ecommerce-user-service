@@ -1,0 +1,35 @@
+
+현재 FeignClient를 사용하는 서비스는 User-Service이다.
+여기서 관련 내용을 명시해보자
+
+● FeignClient 사용시 발생한 로그 추적
+	- 환경설정
+		. (application.yml)
+			. logging.level=com.example.userservice.client:DEBUG
+		. (user-service.yml)
+			order_service
+				exception:
+    				order_is_empty: User's orders is empty.
+	- 프로그램
+		. UserServiceApplication.java
+			. logger.Level를 @Bean으로 등록한다.
+			    @Bean
+			    public Logger.Level feignLoggerLevel() {
+			        return Logger.Level.FULL;
+			    }
+	
+
+다음은 로그가 나오는 예를 보여주고 있다.
+
+2022-11-29 09:32:21.694 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.userservice.service.UserServiceImpl  : --->orderServiceClient>HardCodedTarget(type=OrderServiceClient, name=order-service, url=http://order-service)
+2022-11-29 09:32:21.698 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] ---> GET http://order-service/order-service/a93a8464-8636-4cfe-a7c0-ebebade3ea98/orders HTTP/1.1
+2022-11-29 09:32:21.699 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] ---> END HTTP (0-byte body)
+2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] <--- HTTP/1.1 200 (480ms)
+2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] connection: keep-alive
+2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] content-type: application/json
+2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] date: Tue, 29 Nov 2022 00:32:22 GMT
+2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] keep-alive: timeout=60
+2022-11-29 09:32:22.181 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] transfer-encoding: chunked
+2022-11-29 09:32:22.181 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders]
+2022-11-29 09:32:22.193 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] []
+2022-11-29 09:32:22.193 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] <--- END HTTP (2-byte body)			    
