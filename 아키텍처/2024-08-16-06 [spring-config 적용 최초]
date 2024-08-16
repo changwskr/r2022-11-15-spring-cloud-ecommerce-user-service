@@ -1,0 +1,44 @@
+이작업을 마치면 user-service는 먼저 bootstrap.yaml를 읽고 다음으로 application.yaml 파일을 읽는다.
+주의사항이 있다면 현재 spring-config-service가 먼저 준비가 되어야 된다.
+
+준비작업
+#---------------------------------------------------------------------------------------------------------------------
+[dependency]
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-config</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-bootstrap</artifactId>
+		</dependency>
+#---------------------------------------------------------------------------------------------------------------------
+[bootstrap.yml] 추가
+spring:
+  cloud:
+    config:
+      uri: http://127.0.0.1:8888
+      name: ecommerce
+#---------------------------------------------------------------------------------------------------------------------
+[UserController.java] 수정
+    @GetMapping("/health_check")
+    @Timed(value="users.status", longTask = true)
+    public String status() {
+        return String.format("It's Working in User Service"
+                + ", port(local.server.port)=" + env.getProperty("local.server.port")
+                + ", port(server.port)=" + env.getProperty("server.port")
+                + ", gateway ip=" + env.getProperty("gateway.ip")
+                + ", message=" + env.getProperty("greeting.message")
+                + ", token secret=" + env.getProperty("token.secret")
+                + ", token expiration time=" + env.getProperty("token.expiration_time"));
+    }
+#---------------------------------------------------------------------------------------------------------------------
+
+
+#---------------------------------------------------------------------------------------------------------------------
+
+
+#---------------------------------------------------------------------------------------------------------------------
+
+
