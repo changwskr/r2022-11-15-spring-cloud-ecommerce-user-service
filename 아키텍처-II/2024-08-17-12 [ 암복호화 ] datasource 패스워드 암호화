@@ -1,0 +1,122 @@
+
+
+user-service application.yaml, bootstrap.yml 수정한다.
+    application.yaml의 password 주의하자
+
+#-----------------------------------------------------------------------------------------------------------------------
+[사전]
+#-----------------------------------------------------------------------------------------------------------------------
+[spring-config-service]
+    [pom.xml]
+            #-----------------------------------------------------------------------------------------------------------
+    [application.yaml]
+            spring
+                  profiles:
+                    active: native
+                    # active: git
+
+                  cloud:
+                    config:
+                      server:
+                        native:
+                          search-locations: file:///C:\Programming(23-08-15)\zRepository\r2022-11-17-spring-cloud-config-native-repository
+            #-----------------------------------------------------------------------------------------------------------
+    [bootstrap]
+            #-----------------------------------------------------------------------------------------------------------
+    [프로그램]
+            #-----------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------
+[native-repository]
+    [user-service.yml]
+            #-----------------------------------------------------------------------------------------------------------
+            token:
+              expiration_time: 86400000
+              secret: user_token_native_user_service-dev
+            gateway:
+              ip: 192.168.0.8
+
+            # [2024-08-17-12] 데이타베이스 암호영역으로 config-server를 통해서 인젝션 받는다.
+            spring:
+                datasource:
+                  url: jdbc:h2:mem:h6db
+                  driver-class-name: org.h2.Driver
+                  username: sa
+                  password: '{cipher}d2de159b2508b9b6c43dc64133b451ff74793cfcb09ace7260a7651b16d98f31'
+                  # {cipher}라는 뜻은 암호화된 데이타란 뜻이다.
+                  # password: sa
+                  # http://127.0.0.1:8888/encrypt 통해서 password 입력한다.
+#-----------------------------------------------------------------------------------------------------------------------
+[user-service]
+    [pom.xml]
+            #-----------------------------------------------------------------------------------------------------------
+    [application.yaml]
+            # 삭제한다. spring-config 로 대체한다. 2024-08-17-12
+                                            #  datasource:
+                                            #    url: jdbc:h2:mem:h6db
+                                            #    driver-class-name: org.h2.Driver
+                                            #    username: sa
+                                            #    password: sa
+            #-----------------------------------------------------------------------------------------------------------
+    [bootstrap]
+            spring:
+              cloud:
+                config:
+                  uri: http://127.0.0.1:8888
+                  # 2022-11-28-2 암복호화 정보를 user-service.yml에서 관리한다.
+                  name: user-service
+            #-----------------------------------------------------------------------------------------------------------
+    [프로그램]
+            #-----------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------
+[gateway-service]
+    [pom.xml]
+            #-----------------------------------------------------------------------------------------------------------
+    [application.yaml]
+            #-----------------------------------------------------------------------------------------------------------
+    [bootstrap]
+            #-----------------------------------------------------------------------------------------------------------
+    [프로그램]
+            #-----------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------
+[테스트]
+    1. 먼저 user-service.yaml 파일을 가지고 오는지 확인하자
+    http://127.0.0.1:8888/user-service/default
+    {
+        "name": "user-service",
+        "profiles": [
+            "default"
+        ],
+        "label": null,
+        "version": null,
+        "state": null,
+        "propertySources": [
+            {
+                "name": "file:C:\\Programming(23-08-15)\\zRepository\\r2022-11-17-spring-cloud-config-native-repository\\user-service.yml",
+                "source": {
+                    "token.expiration_time": 86400000,
+                    "token.secret": "user_token_native_user_service-dev",
+                    "gateway.ip": "192.168.0.8",
+                    "spring.datasource.url": "jdbc:h2:mem:h6db",
+                    "spring.datasource.driver-class-name": "org.h2.Driver",
+                    "spring.datasource.username": "sa",
+                    "spring.datasource.password": "sa"
+                }
+            },
+            {
+                "name": "file:C:\\Programming(23-08-15)\\zRepository\\r2022-11-17-spring-cloud-config-native-repository\\application.yml",
+                "source": {
+                    "token.expiration_time": 86400000,
+                    "token.secret": "user_token_native_application_changed_2",
+                    "gateway.ip": "192.168.0.8"
+                }
+            }
+        ]
+    }
+
+    실제 user-service.yaml 파일은 다음과 같이 저장되어 있다.
+    spring:
+        datasource:
+          url: jdbc:h2:mem:h6db
+          driver-class-name: org.h2.Driver
+          username: sa
+          password: '{cipher}d2de159b2508b9b6c43dc64133b451ff74793cfcb09ace7260a7651b16d98f31'

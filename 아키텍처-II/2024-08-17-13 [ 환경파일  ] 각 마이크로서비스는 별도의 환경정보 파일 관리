@@ -1,0 +1,155 @@
+각자 마이크로서비스 마다 환경파일 정보를 다르게 가지게 하는 경우
+
+#-----------------------------------------------------------------------------------------------------------------------
+[사전]
+#-----------------------------------------------------------------------------------------------------------------------
+[spring-config-service]
+    [pom.xml]
+            #-----------------------------------------------------------------------------------------------------------
+    [application.yaml]
+            spring
+                  profiles:
+                    active: native
+                    # active: git
+
+                  cloud:
+                    config:
+                      server:
+                        native:
+                          search-locations: file:///C:\Programming(23-08-15)\zRepository\r2022-11-17-spring-cloud-config-native-repository
+            #-----------------------------------------------------------------------------------------------------------
+    [bootstrap]
+            #-----------------------------------------------------------------------------------------------------------
+    [프로그램]
+            #-----------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------
+[native-repository]
+    [user-service.yml]
+            #-----------------------------------------------------------------------------------------------------------
+            token:
+              expiration_time: 86400000
+              secret: user_token_native_user_service-dev
+            gateway:
+              ip: 192.168.0.8
+            spring:
+                datasource:
+                  url: jdbc:h2:mem:h6db
+                  driver-class-name: org.h2.Driver
+                  username: sa
+                  password: '{cipher}d2de159b2508b9b6c43dc64133b451ff74793cfcb09ace7260a7651b16d98f31'
+    [gateway-service.yml]
+            #-----------------------------------------------------------------------------------------------------------
+            token:
+              expiration_time: 86400000
+              secret: user_token_native_user_service-dev
+            gateway:
+              ip: 192.168.0.8
+            spring:
+                datasource:
+                  url: jdbc:h2:mem:h6db
+                  driver-class-name: org.h2.Driver
+                  username: sa
+                  password: '{cipher}d2de159b2508b9b6c43dc64133b451ff74793cfcb09ace7260a7651b16d98f31'
+#-----------------------------------------------------------------------------------------------------------------------
+[user-service]
+    [pom.xml]
+            #-----------------------------------------------------------------------------------------------------------
+    [application.yaml]
+            #-----------------------------------------------------------------------------------------------------------
+    [bootstrap]
+            spring:
+              cloud:
+                config:
+                  uri: http://127.0.0.1:8888
+                  name: user-service
+            #-----------------------------------------------------------------------------------------------------------
+    [프로그램]
+            #-----------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------
+[gateway-service]
+    [pom.xml]
+            #-----------------------------------------------------------------------------------------------------------
+    [application.yaml]
+            #-----------------------------------------------------------------------------------------------------------
+    [bootstrap]
+            spring:
+              cloud:
+                config:
+                  uri: http://127.0.0.1:8888
+                  name: gateway-service
+            #-----------------------------------------------------------------------------------------------------------
+    [프로그램]
+            #-----------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------
+[테스트]
+    1. 먼저 user-service.yaml 파일을 가지고 오는지 확인하자
+    http://127.0.0.1:8888/gateway-service/default
+    http://127.0.0.1:8888/user-service/default
+
+{
+    "name": "gateway-service",
+    "profiles": [
+        "default"
+    ],
+    "label": null,
+    "version": null,
+    "state": null,
+    "propertySources": [
+        {
+            "name": "file:C:\\Programming(23-08-15)\\zRepository\\r2022-11-17-spring-cloud-config-native-repository\\gateway-service.yml",
+            "source": {
+                "token.expiration_time": 86400000,
+                "token.secret": "roian_token_native-default",
+                "gateway.ip": "192.168.0.8",
+                "spring.datasource.url": "jdbc:h2:mem:h6db",
+                "spring.datasource.driver-class-name": "org.h2.Driver",
+                "spring.datasource.username": "sa",
+                "spring.datasource.password": "sa"
+            }
+        },
+        {
+            "name": "file:C:\\Programming(23-08-15)\\zRepository\\r2022-11-17-spring-cloud-config-native-repository\\application.yml",
+            "source": {
+                "token.expiration_time": 86400000,
+                "token.secret": "user_token_native_application_changed_2",
+                "gateway.ip": "192.168.0.8"
+            }
+        }
+
+
+
+    ]
+}
+
+
+{
+    "name": "user-service",
+    "profiles": [
+        "default"
+    ],
+    "label": null,
+    "version": null,
+    "state": null,
+    "propertySources": [
+        {
+            "name": "file:C:\\Programming(23-08-15)\\zRepository\\r2022-11-17-spring-cloud-config-native-repository\\user-service.yml",
+            "source": {
+                "token.expiration_time": 86400000,
+                "token.secret": "roian_token_native-default",
+                "gateway.ip": "192.168.0.8",
+                "spring.datasource.url": "jdbc:h2:mem:h6db",
+                "spring.datasource.driver-class-name": "org.h2.Driver",
+                "spring.datasource.username": "sa",
+                "spring.datasource.password": "sa"
+            }
+        },
+        {
+            "name": "file:C:\\Programming(23-08-15)\\zRepository\\r2022-11-17-spring-cloud-config-native-repository\\application.yml",
+            "source": {
+                "token.expiration_time": 86400000,
+                "token.secret": "user_token_native_application_changed_2",
+                "gateway.ip": "192.168.0.8"
+            }
+        }
+    ]
+}
