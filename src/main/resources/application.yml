@@ -52,6 +52,7 @@ spring:
     show-sql: true
     properties:
       hibernate.format_sql: true
+
   #---------------------------------------------------------- restapi helper
   mvc:
     # ----------------------------------------------------------
@@ -65,9 +66,9 @@ eureka:
   instance:
     hostname: localhost
     instance-id: ${spring.application.host}:${spring.application.name}:${spring.application.instance_id:${random.value}}
-#    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
-  #    prefer-ip-address: true
-  #    ip-address: ${server.address}
+      #    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+      #    prefer-ip-address: true
+      #    ip-address: ${server.address}
   client:
     service-url:
       defaultZone: http://127.0.0.1:8761/eureka
@@ -80,20 +81,22 @@ logging:
   level:
     com.example.userservice: DEBUG
 
-token:
-  expiration_time: 86400000
-  secret: user_token
-
 # ----------------------------------------------
 # spring acturator 기능
 # 환경정보 변경시 재기동이 아닌 환경변경 부분을 엔진에 적용하는 기능
 # 관련 파일 - application.yml, websecurity.configure()에 관련 내용 적용한다.
 #                - pom.xml에 dependency 기능 추가 actuator
 #----------------------------------------------
-
 management:
   endpoints:
     web:
       exposure:
         include: refresh, health, beans, busrefresh, info, metrics, prometheus
 
+
+# ----------------------------------------------
+# 08-16-06 이정보는 이제 sping-config-sercice를 통해 주입받는다. 삭제한다.
+# ----------------------------------------------
+#token:
+#  expiration_time: 86400000
+#  secret: user_token

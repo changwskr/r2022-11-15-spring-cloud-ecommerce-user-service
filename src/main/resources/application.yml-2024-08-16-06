@@ -80,10 +80,6 @@ logging:
   level:
     com.example.userservice: DEBUG
 
-token:
-  expiration_time: 86400000
-  secret: user_token
-
 # ----------------------------------------------
 # spring acturator 기능
 # 환경정보 변경시 재기동이 아닌 환경변경 부분을 엔진에 적용하는 기능
@@ -97,3 +93,10 @@ management:
       exposure:
         include: refresh, health, beans, busrefresh, info, metrics, prometheus
 
+
+# ----------------------------------------------
+# 08-16-06 이정보는 이제 sping-config-sercice를 통해 주입받는다. 삭제한다.
+# ----------------------------------------------
+#token:
+#  expiration_time: 86400000
+#  secret: user_token
