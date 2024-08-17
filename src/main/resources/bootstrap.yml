@@ -2,5 +2,5 @@ spring:
   cloud:
     config:
       uri: http://127.0.0.1:8888
-      # 2022-11-28-2 암복호화 정보를 user-service.yml에서 관리한다.
+      # 2022-11-28-2 암복호화 정보를 ecommerce.yml에서 관리한다.
       name: ecommerce
