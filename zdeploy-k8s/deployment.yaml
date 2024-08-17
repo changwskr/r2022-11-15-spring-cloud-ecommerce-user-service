@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-userservice-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-userservice
+  template:
+    metadata:
+      labels:
+        app: my-userservice
+    spec:
+      containers:
+        - name: my-userservice
+          image: changwskr/my-userservice:latest
+          ports:
+            - containerPort: 8080

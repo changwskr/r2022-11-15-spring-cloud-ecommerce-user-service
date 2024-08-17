@@ -25,6 +25,10 @@ spring:
         web-allow-others: true
       path: /h2-console
   # ----------------------------------------------------------
+  devtools:
+    livereload:
+      enabled: false
+  # ----------------------------------------------------------
 
   # [2022-11-17] 데이타베이스 암호영역으로 config-server를 통해서 인젝션 받는다.
   # 위치는 config-server의 환경정보를 저장하는 native영역이다. 2022-11-17-spring-cloud-config-native-repository
@@ -92,7 +96,8 @@ management:
     web:
       exposure:
         include: refresh, health, beans, busrefresh, info, metrics, prometheus
-
+    health:
+      show-details: always
 
 # ----------------------------------------------
 # 08-16-06 이정보는 이제 sping-config-sercice를 통해 주입받는다. 삭제한다.

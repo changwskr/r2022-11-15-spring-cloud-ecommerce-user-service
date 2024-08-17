@@ -1,0 +1,5 @@
+C:\Programming(23-08-15)\RabbitMQ Server
+C:\Programming(23-08-15)\ErlantOTP
+
+actuator에서 계속 down이 되어서 rabbit을 설치해주니 정상으로 돌아왔다.
+
