@@ -1,0 +1,86 @@
+
+비대칭 테스트를 위해서 알아야 될 내용은
+	- keytool을 사용해서 개인키를 생성한다.
+	- 생성된 개인키는 keystore 라는 특별한 공간에 저장한다.
+	- 비대칭는 암복호화시 다른키가 사용된다는 말이다.
+		즉 암호화할때와 복호화 할때 같은 키를 사용하지 않는 다는 말이다.
+		
+● 개인키 생성
+	- 위치 
+		2022-11-17-spring-cloud-config-repository\keystore
+	- 생성
+		keytool -genkeypair -alias apiEncryptionKey -keyalg RSA \
+		-dname "CN=Kenneth Lee, OU=API Development, O=joneconsulting.co.kr, L=Seoul, C=KR" \
+		-keypass "1q2w3e4r" -keystore apiEncryptionKey.jks -storepass "1q2w3e4r"
+		
+● 환경구성
+	(config-service)
+		(bootstrap.yml)
+		  key-store:
+		    location: file:///C:\WSJ_EX\01.workspace\2022-11-17-spring-cloud-config-repository\keystore\apiEncryptionKey.jks
+		    password: 1q2w3e4r
+		    alias: apiEncryptionKey	
+		    
+	(2022-11-17-spring-cloud-config-native-repository)
+		- 학습 : secret에 암호화적용과  encrypt  key 적용
+		(ecommerce.yml)
+			token:
+			  expiration_time: 86400000
+			  # secret: '{cipher}AQA2UDLKLRGLI7E8xaHogrZMgKRjg/RN0KNq9IYhBe2UsfWCQ7jSVaysPzSJarE8Qb9I03aiT2UNatUhzrnV69V6M0SnHenX+p5iCUGtttw1rMtXE+xa+SWdi39hcjW69m9VpELV13I/3UylHq2XKuoYYPlAxCd4wlFl3kVvTHgeRcHAh/1gNrEl92NVIDGXBFd4yapq+CX7pJeIM95gUYLg6hr3rF9g7ZzIoOvjUHd6cqYpQFJuhEhjO+PDD21cTtli0Rc2SJTJlkOyIvdLQkjjkos8csd+WoZwh18hZJmv3Ddysm9rGAr8xWMjhkz3mh1Fvv3/cWlOrUFEGZkL/ZIvi+gHLJb7QJl9TwCzuqh5jGX0P5HwX++OAB901Ql9OUFvNgURprc3py1nsU/oHmYK'
+			  secret: user_token_native				
+			encrypt:
+			# 대칭키를 이용해서 암호화하는 경우
+			  key: abcdefghijklmnopqrstuvwxyz0123456789
+  	    
+
+● 검증 방법
+ 	- 테스트
+ 		. 먼저 user-service가 config-service의 user-service.xml를 참조하는 지 확인
+ 			.http://127.0.0.1:8888/encrypt (post)
+ 				ecommerce1234
+ 				AQAcKqR55iYRmZGzIKei+eXeuj7kIE7qUFoOKBSq7X4iMm1UDZTSwJ1wq8ZYGMxOHbd0Gvv3+h/HJeaM7XG8invJtybntWRcYoWhfz6iIlEN/2pArYwPQR33U16DOJrvmktmPr8I+xbYRZdAVTs6ElVB6XowYLImPTPethnNYkrVto90F5tbh9xOFmWdKOPyl+4cAwpeTZHZxlWbKPS8VWprFgj5J+cAIAzw8cIwyRVbKyoeOQRZ/jIU3RfyQdDl7QJfPa9j3BfWX2pIXC8gcpcCo3li2XTuw0Z9+L1YUkNX42I5ba0r159V7K+T+nNTkazgseFrUCSPBW4sPLDGWMlEZcHYDEmAbcPE3FAF4sQKTY34qpk2th9qOgaiA3kv2qg=
+ 	- 적용위치
+ 		. 암호를 적용한 곳
+ 			. user-service.yml
+ 				. datasource
+ 					.passwd
+ 			. ecommerce.yml
+ 				. tocken.secret
+ 	- 확인방법
+ 		- http://127.0.0.1:8888/ecommerce/default
+ 						
+
+#######################################################################
+# 개인키/공개키 생성 방법
+#######################################################################
+1) 개인키생성
+keytool -genkeypair -alias apiEncryptionKey -keyalg RSA -dname "CN=Kenneth Lee, OU=API Development, O=joneconsulting.co.kr, L=Seoul, C=KR" -keypass "1q2w3e4r" -keystore apiEncryptionKey.jks -storepass "1q2w3e4r"
+생성된 apiEncryptionKey.jks 파일을 이용해서 복호화를 하면 된다.
+
+2) 개인키생성 정보 확인
+keytool -list -keystore apiEncryptionKey.jks -v
+
+3) 개인키를 이용해서 공개키 생성 방법=> 인증서 생성
+keytool -export -alias apiEncryptionKey -keystore apiEncryptionKey.jks -rfc -file trustServer.cer
+
+4) 인증서 파일을 공개키 jks 파일로 변환해서 사용가능
+cd C:\WSJ_EX\01.workspace\2022-11-17-spring-cloud-config-repository\keystore
+keytool -import -alias trustServer -file trustServer.cer -keystore  publicKey.jks
+keytool -list -keystore publicKey.jks -v		
+
+5) 공개키와 개인키 비교 - 비대칭킹 생성 
+keytool -list -keystore publicKey.jks
+		trustserver, 2022. 11. 17., trustedCertEntry,
+ 		Certificate fingerprint (SHA-256): F9:09:9D:53:EF:65:26:AE:D4:8C:33:19:5E:92:E4:A4:8E:C6:00:69:A6:D0:0E:92:C4:FD:DE:19:A4:4E:BD:9C
+keytool -list -keystore apiEncryptionKey.jks
+		apiencryptionkey, 2022. 11. 17., PrivateKeyEntry,
+		Certificate fingerprint (SHA-256): F9:09:9D:53:EF:65:26:AE:D4:8C:33:19:5E:92:E4:A4:8E:C6:00:69:A6:D0:0E:92:C4:FD:DE:19:A4:4E:BD:9C
+		
+● 생성된 개별키를 config-server 환경에 적용한다
+	- bootstap.yml
+		- encrypt:
+			# 2022-11-28-3 비대칭 암복호화 용으로 적용
+			  key-store:
+			    location: file:///C:\WSJ_EX\01.workspace\2022-11-17-spring-cloud-config-repository\keystore\apiEncryptionKey.jks
+			    password: 1q2w3e4r
+			    alias: apiEncryptionKey		
