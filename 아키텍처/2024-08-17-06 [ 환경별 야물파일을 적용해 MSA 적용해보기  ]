@@ -1,0 +1,23 @@
+[apigateway-service/bootstrap.yml] 08-17-06
+spring:
+  cloud:
+    config:
+      uri: http://127.0.0.1:8888
+      name: ecommerce
+  profiles:
+    active: dev ===> dev로 수정해서 재기동한다.
+
+#-----------------------------------------------------------------------------------------------------------------------
+[테스트 절차]
+    api-gateway-service msa 재기동
+
+[1] 방법은 gateway 환경을 개발로 맞추고 --- 08-17-06
+    spring-config에서 재전파 한다.
+
+
+
+
+
+
+
+

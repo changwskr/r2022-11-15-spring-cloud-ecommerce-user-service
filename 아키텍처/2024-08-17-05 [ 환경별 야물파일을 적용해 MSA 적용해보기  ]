@@ -1,0 +1,73 @@
+이번에는 C:\Programming(23-08-15)\zRepository\zlogcal-dir 로컬레파지디렉토에 있는
+ecommerce.yaml 파일을 ecommerce-dev.yaml, ecommerce-prod.yaml ecommerce-uat.yaml 세개를 준비한다.
+
+사전 마이크로서비스의 가정은
+    user-service는 개발환경으로 가정하고 ecommerce-dev.yaml 을 사용하고
+    gateway-service는 운영환경으로 가정하고 ecommerce-prod.yaml을 사용한다.
+
+spring-config는 두개의 msa에 서비스로 ecommerce.yaml를 전파한다.
+
+각 마이크로서비스는 각기 기동시 자신의 환경을 무엇으로 할것인지 결정하기 위해 bootstrap.yaml 파일에 자신의 환경정보를 명시한다.
+
+#-----------------------------------------------------------------------------------------------------------------------
+[C:\Programming(23-08-15)\zRepository\zlogcal-dir\ecommerce.yaml]
+    token:
+      expiration_time: 86400000
+      secret: user_token_default
+    gateway:
+      ip: 192.168.0.8
+
+[C:\Programming(23-08-15)\zRepository\zlogcal-dir\ecommerce-dev.yaml]
+    token:
+      expiration_time: 86400000
+      secret: user_token_dev
+    gateway:
+      ip: 192.168.0.8
+
+[C:\Programming(23-08-15)\zRepository\zlogcal-dir\ecommerce-prod.yaml]
+    token:
+      expiration_time: 86400000
+      secret: user_token_prod
+    gateway:
+      ip: 192.168.0.8
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+[user-service/bootstrap.yml] 08-17-05
+spring:
+  cloud:
+    config:
+      uri: http://127.0.0.1:8888
+      name: ecommerce
+  profiles:
+    active: dev
+
+[apigateway-service/bootstrap.yml] 08-17-05
+spring:
+  cloud:
+    config:
+      uri: http://127.0.0.1:8888
+      name: ecommerce
+  profiles:
+    active: prod
+
+#-----------------------------------------------------------------------------------------------------------------------
+[테스트 절차]
+    spring-config msa 재기동
+    user-service msa 재기동
+    api-gateway-service msa 재기동
+
+[1] user-service는 dev 환경으로 기동된 상태이고
+    gateway는 prod 환경으로 기동된 상태이다. 그러므로 현재 서로 토큰정보가 맞지않아
+    권한오류가 발생한다.
+
+[2] 방법은 gateway 환경을 개발로 맞추고 --- 08-17-06
+    spring-config에서 재전파 한다.
+
+
+
+
+
+
+
+
