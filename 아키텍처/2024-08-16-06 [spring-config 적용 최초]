@@ -1,9 +1,14 @@
-이작업을 마치면 user-service는 먼저 bootstrap.yaml를 읽고 다음으로 application.yaml 파일을 읽는다.
-주의사항이 있다면 현재 spring-config-service가 먼저 준비가 되어야 된다.
-application.yaml 파일내에 token은 삭제하고 token은 spring-config-service를 통해서 수신한다.
+각종 환경정보를 spring-config-service를 통해서 주입받게 된다.
+
+spring-config의 변경이 발생하면 관련 있는 서비스는
+재기동
+actuator refresh
+spring bus 를 통해서 재 수신해야 된다.
+
+여기서는 재기동 방식이다.
 
 [주의사항]
-절대로 local directory일 경우에는 git push 하면 안된다.
+    절대로 local directory일 경우에는 git push 하면 안된다.
 
 준비작업
 #---------------------------------------------------------------------------------------------------------------------
