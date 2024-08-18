@@ -21,15 +21,15 @@
 
 다음은 로그가 나오는 예를 보여주고 있다.
 
-2022-11-29 09:32:21.694 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.userservice.service.UserServiceImpl  : --->orderServiceClient>HardCodedTarget(type=OrderServiceClient, name=order-service, url=http://order-service)
-2022-11-29 09:32:21.698 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] ---> GET http://order-service/order-service/a93a8464-8636-4cfe-a7c0-ebebade3ea98/orders HTTP/1.1
-2022-11-29 09:32:21.699 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] ---> END HTTP (0-byte body)
-2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] <--- HTTP/1.1 200 (480ms)
-2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] connection: keep-alive
-2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] content-type: application/json
-2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] date: Tue, 29 Nov 2022 00:32:22 GMT
-2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] keep-alive: timeout=60
-2022-11-29 09:32:22.181 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] transfer-encoding: chunked
-2022-11-29 09:32:22.181 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders]
-2022-11-29 09:32:22.193 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] []
-2022-11-29 09:32:22.193 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.OrderServiceClient          : [OrderServiceClient#getOrders] <--- END HTTP (2-byte body)			    
+2022-11-29 09:32:21.694 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.userservice.service.UserServiceImpl  : --->tpsSendRecvOrderService>HardCodedTarget(type=tpsSendRecvOrderService, name=order-service, url=http://order-service)
+2022-11-29 09:32:21.698 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.tpsSendRecvOrderService          : [tpsSendRecvOrderService#getOrders] ---> GET http://order-service/order-service/a93a8464-8636-4cfe-a7c0-ebebade3ea98/orders HTTP/1.1
+2022-11-29 09:32:21.699 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.tpsSendRecvOrderService          : [tpsSendRecvOrderService#getOrders] ---> END HTTP (0-byte body)
+2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.tpsSendRecvOrderService          : [tpsSendRecvOrderService#getOrders] <--- HTTP/1.1 200 (480ms)
+2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.tpsSendRecvOrderService          : [tpsSendRecvOrderService#getOrders] connection: keep-alive
+2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.tpsSendRecvOrderService          : [tpsSendRecvOrderService#getOrders] content-type: application/json
+2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.tpsSendRecvOrderService          : [tpsSendRecvOrderService#getOrders] date: Tue, 29 Nov 2022 00:32:22 GMT
+2022-11-29 09:32:22.180 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.tpsSendRecvOrderService          : [tpsSendRecvOrderService#getOrders] keep-alive: timeout=60
+2022-11-29 09:32:22.181 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.tpsSendRecvOrderService          : [tpsSendRecvOrderService#getOrders] transfer-encoding: chunked
+2022-11-29 09:32:22.181 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.tpsSendRecvOrderService          : [tpsSendRecvOrderService#getOrders]
+2022-11-29 09:32:22.193 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.tpsSendRecvOrderService          : [tpsSendRecvOrderService#getOrders] []
+2022-11-29 09:32:22.193 DEBUG [user-service,69acd579915c5408,69acd579915c5408] 20220 --- [o-auto-1-exec-5] c.e.u.client.tpsSendRecvOrderService          : [tpsSendRecvOrderService#getOrders] <--- END HTTP (2-byte body)

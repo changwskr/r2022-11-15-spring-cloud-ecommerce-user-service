@@ -3,10 +3,10 @@ package com.example.userservice.business.as;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import com.example.userservice.business.dc.UserServiceDC;
-import com.example.userservice.web.transfer.vo.ResponseUserFormVO;
+import com.example.userservice.tpm.TPSsendrecvCatalogService;
+import com.example.userservice.web.transfer.vo.ResponseCatalogVO;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.example.userservice.business.client.OrderServiceClient;
-//import com.example.userservice.client.OrderServiceClient;
+import com.example.userservice.tpm.TPSsendrecvOrderService;
 import com.example.userservice.transfer.dto.UserDto;
 import com.example.userservice.business.dc.dao.model.UserEntity;
 import com.example.userservice.business.dc.dao.IUserRepositoryDAO;
@@ -44,7 +43,8 @@ public class UserServiceASImpl implements UserServiceAS {
     Environment env;
     RestTemplate restTemplate;
     
-    OrderServiceClient orderServiceClient;
+    TPSsendrecvOrderService tpsSendRecvOrderService;
+    TPSsendrecvCatalogService tpsSendrecvCatalogService;
 
     CircuitBreakerFactory circuitBreakerFactory;
 
@@ -54,14 +54,16 @@ public class UserServiceASImpl implements UserServiceAS {
                              UserServiceDC userServiceDC,
                              Environment env,
                              RestTemplate restTemplate,
-                             OrderServiceClient orderServiceClient,
+                             TPSsendrecvOrderService tpsSendRecvOrderService,
+                             TPSsendrecvCatalogService tpsSendrecvCatalogService,
                              CircuitBreakerFactory circuitBreakerFactory) {
         this.IUserRepositoryDAO = IUserRepositoryDAO;
         this.passwordEncoder = passwordEncoder;
         this.userServiceDC = userServiceDC;
         this.env = env;
         this.restTemplate = restTemplate;
-        this.orderServiceClient = orderServiceClient;
+        this.tpsSendRecvOrderService = tpsSendRecvOrderService;
+        this.tpsSendrecvCatalogService = tpsSendrecvCatalogService;
         this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
@@ -85,10 +87,12 @@ public class UserServiceASImpl implements UserServiceAS {
          * 3) Circuit Braker         
          * --------------------------------------------------------------------------------------- */
         
-        boolean foo_t1 = true;     // RestTemplate 방식
-        boolean foo_t2_1 = false;   // feign 예외직접 처리
+        boolean foo_t1 = false;     // RestTemplate 방식 - 08-18-01
+        boolean foo_t2_1 = true;   // feign 예외직접 처리 - 08-18-02
         boolean foo_t2_2 = false;   // feign 예외자체 처리 - FeignErrorDecoder
         boolean foo_t3 = false;     // circuit 적용
+        boolean foo_t4 = true;     // feign tpcsendrecv 적용
+
         
         List<ResponseOrderFormVO> ordersList = null;
 
@@ -120,9 +124,9 @@ public class UserServiceASImpl implements UserServiceAS {
 	        /* Feign exception handling */
 	        /* ErrDecoder에서 다음의 예외처리를 해주므로 다음의 해결책으로 정리한다. */        	
 	        try {
-		        log.debug("--->orderServiceClient>"+orderServiceClient);
-
-	            ordersList = orderServiceClient.getOrders(userId);
+		        log.debug("요청--->tpsSendRecvOrderService>"+tpsSendRecvOrderService);
+	            ordersList = tpsSendRecvOrderService.getOrders(userId);
+                log.debug("응답--->ordersList>"+ordersList);
 	        } catch (FeignException ex) {
 	        	log.error("--Feign client 호출에러");
 	            log.error(ex.getMessage());
@@ -132,7 +136,7 @@ public class UserServiceASImpl implements UserServiceAS {
 	        /* ErrorDecoder */
         	// 에러디코더를 사용하면 자체내에 예외처리 가이드가 기술되어 있다.
 	        log.info("Before call orders microservice");
-        	ordersList = orderServiceClient.getOrders(userId);
+        	ordersList = tpsSendRecvOrderService.getOrders(userId);
         }
         else if(foo_t3) {
 	        /*
@@ -140,13 +144,30 @@ public class UserServiceASImpl implements UserServiceAS {
 	         */
 	        log.info("★★★ Before call orders microservice");
 			CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitbreaker");			
-			ordersList = circuitBreaker.run(() -> orderServiceClient.getOrders(userId),
+			ordersList = circuitBreaker.run(() -> tpsSendRecvOrderService.getOrders(userId),
 					throwable -> new ArrayList<>()); // 만약 order서비스가 비정상적이라면, new ArrayList<>()이라는 아무것도 없는 값을 리턴한다. 
 			log.info("★★★ After called orders microservice");
         }
         else{
             ordersList = new ArrayList();
         }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // 테스트
+        if(foo_t4) {
+            List<ResponseCatalogVO> catalogsList = null;
+            try {
+                log.debug("요청--->tpsSendrecvCatalogService>"+tpsSendrecvCatalogService);
+                catalogsList = tpsSendrecvCatalogService.getCatalogs();
+                log.debug("응답--->tpsSendrecvCatalogService>" + catalogsList);
+            } catch (FeignException ex) {
+                log.error("--Feign client 호출에러");
+                log.error(ex.getMessage());
+            }
+
+
+        }
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         userDto.setOrders(ordersList);
 

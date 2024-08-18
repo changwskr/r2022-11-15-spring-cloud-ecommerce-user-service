@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 
-import com.example.userservice.business.error.FeignErrorDecoder;
+import com.example.userservice.tpm.error.FeignErrorDecoder;
 
 import feign.Logger;
 

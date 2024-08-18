@@ -1,4 +1,4 @@
-package com.example.userservice.business.error;
+package com.example.userservice.tpm.error;
 
 import feign.Response;
 import feign.codec.ErrorDecoder;
@@ -28,9 +28,10 @@ public class FeignErrorDecoder implements ErrorDecoder {
             case 400:
                 break;
             case 404:
+                // 스트링중에 getOrders 메소드에 한해서만 처리하겠다.
                 if (methodKey.contains("getOrders")) {
                     return new ResponseStatusException(HttpStatus.valueOf(response.status()),
-                    		// 2022-11-29-1 user-service.yml에 order.exception 관련내용을 명시해서 사용하자
+                    		// 2022-11-29-1 user-service.yml, ecommerce.yml 에 order.exception 관련내용을 명시해서 사용하자
                             env.getProperty("order_service.exception.orders_is_empty")); // user-service.yml
                 }
                 break;
