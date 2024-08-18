@@ -76,12 +76,7 @@ public class UserServiceASImpl implements UserServiceAS {
     @Override
     public UserDto getUserByUserId(String userId) {
     	
-    	log.debug("----------------------->getUserByUserId start");
         UserDto userDto = userServiceDC.findByUserId(userId);
-
-        {
-        	String orderUrl = "http://127.0.0.1:8000/order-service/%s/orders";
-        }
 
         /* ---------------------------------------------------------------------------------------- *
          * Order-Service를 호출하는 방법은
@@ -90,30 +85,35 @@ public class UserServiceASImpl implements UserServiceAS {
          * 3) Circuit Braker         
          * --------------------------------------------------------------------------------------- */
         
-        boolean foo_t1 = false;
-        boolean foo_t2_1 = false; // feign 예외직접 처리
-        boolean foo_t2_2 = false; // feign 예외자체 처리 - FeignErrorDecoder
-        boolean foo_t3 = false; // circuit 적용
+        boolean foo_t1 = true;     // RestTemplate 방식
+        boolean foo_t2_1 = false;   // feign 예외직접 처리
+        boolean foo_t2_2 = false;   // feign 예외자체 처리 - FeignErrorDecoder
+        boolean foo_t3 = false;     // circuit 적용
         
         List<ResponseOrderFormVO> ordersList = null;
-        
+
         if( foo_t1 ) {
-        	
-	        /* 1) Using as rest template */
-	        // exchange(url,GET,requestEntity,받아오고자하는 데이타타입)
-	        // order_service.url은 user-service.yml에 선언한다.
-	        // url: http://127.0.0.1:8000/order-service/%s/orders
+
+	        /* 1) Using as rest template                                */
+	        /* exchange(url,GET,requestEntity,받아오고자하는 데이타타입)   */
+	        /* order_service.url은 user-service.yml에 선언한다.          */
+	        /* url: http://127.0.0.1:8000/order-service/%s/orders       */
+
 	        List<ResponseOrderFormVO> orders = new ArrayList<>();
 	        String orderUrl = String.format(env.getProperty("order_service.url"), userId);
-	        log.debug("--->orderUrl>"+orderUrl);
+	        log.debug("요청--->orderUrl>"+orderUrl);
 	        
 	        ResponseEntity<List<ResponseOrderFormVO>> orderListResponse =
-	                restTemplate.exchange(orderUrl, HttpMethod.GET, null,
-	                                            new ParameterizedTypeReference<List<ResponseOrderFormVO>>() {
-	                });
+
+	                restTemplate.exchange(   orderUrl,
+                                             HttpMethod.GET,
+                                null,
+	                                         new ParameterizedTypeReference<List<ResponseOrderFormVO>>() {
+	                                         }
+                                 );
 	        
 	        ordersList = orderListResponse.getBody();
-	        log.debug("--->ordersList>"+ordersList);
+	        log.debug("응답--->ordersList>"+ordersList);
         }
         else if(foo_t2_1) {
 	        /* 2) Using a feign client */
