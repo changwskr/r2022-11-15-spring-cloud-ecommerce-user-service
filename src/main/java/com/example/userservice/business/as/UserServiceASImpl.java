@@ -87,16 +87,16 @@ public class UserServiceASImpl implements UserServiceAS {
          * 3) Circuit Braker         
          * --------------------------------------------------------------------------------------- */
         
-        boolean foo_t1 = false;     // RestTemplate 방식 - 08-18-01
-        boolean foo_t2_1 = true;   // feign 예외직접 처리 - 08-18-02
-        boolean foo_t2_2 = false;   // feign 예외자체 처리 - FeignErrorDecoder
-        boolean foo_t3 = false;     // circuit 적용
-        boolean foo_t4 = true;     // feign tpcsendrecv 적용
+        boolean REST_TEMPLATE_TPM_TYPE = false;     // RestTemplate 방식 - 08-18-01
+        boolean FEIGN_TPM_DIRECT_EXECEPTION = false;   // feign 예외직접 처리 - 08-18-02
+        boolean FEIGN_TPM_EXECEPTION = false;   // feign 예외자체 처리 - FeignErrorDecoder
+        boolean CIRCUITBREAK_TPM = true;     // circuit 적용
+        boolean TPM_GENERAL_TYPE = false;     // feign tpcsendrecv 적용
 
         
         List<ResponseOrderFormVO> ordersList = null;
 
-        if( foo_t1 ) {
+        if( REST_TEMPLATE_TPM_TYPE ) {
 
 	        /* 1) Using as rest template                                */
 	        /* exchange(url,GET,requestEntity,받아오고자하는 데이타타입)   */
@@ -119,7 +119,7 @@ public class UserServiceASImpl implements UserServiceAS {
 	        ordersList = orderListResponse.getBody();
 	        log.debug("응답--->ordersList>"+ordersList);
         }
-        else if(foo_t2_1) {
+        else if(FEIGN_TPM_DIRECT_EXECEPTION) {
 	        /* 2) Using a feign client */
 	        /* Feign exception handling */
 	        /* ErrDecoder에서 다음의 예외처리를 해주므로 다음의 해결책으로 정리한다. */        	
@@ -132,21 +132,20 @@ public class UserServiceASImpl implements UserServiceAS {
 	            log.error(ex.getMessage());
 	        }
         }
-        else if(foo_t2_2) {
+        else if(FEIGN_TPM_EXECEPTION) {
 	        /* ErrorDecoder */
         	// 에러디코더를 사용하면 자체내에 예외처리 가이드가 기술되어 있다.
 	        log.info("Before call orders microservice");
         	ordersList = tpsSendRecvOrderService.getOrders(userId);
         }
-        else if(foo_t3) {
-	        /*
-	         * 3) circuit 적용
-	         */
-	        log.info("★★★ Before call orders microservice");
+        else if(CIRCUITBREAK_TPM) {
+
+            // 써킷브레이크를 통해서 서비스를 호출한다.
+	        log.info("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ Before call orders microservice");
 			CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitbreaker");			
 			ordersList = circuitBreaker.run(() -> tpsSendRecvOrderService.getOrders(userId),
 					throwable -> new ArrayList<>()); // 만약 order서비스가 비정상적이라면, new ArrayList<>()이라는 아무것도 없는 값을 리턴한다. 
-			log.info("★★★ After called orders microservice");
+			log.info("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ After called orders microservice");
         }
         else{
             ordersList = new ArrayList();
@@ -154,7 +153,7 @@ public class UserServiceASImpl implements UserServiceAS {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 테스트
-        if(foo_t4) {
+        if(TPM_GENERAL_TYPE) {
             List<ResponseCatalogVO> catalogsList = null;
             try {
                 log.debug("요청--->tpsSendrecvCatalogService>"+tpsSendrecvCatalogService);

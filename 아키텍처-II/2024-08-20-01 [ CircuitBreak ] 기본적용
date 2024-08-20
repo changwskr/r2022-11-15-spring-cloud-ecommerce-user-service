@@ -1,0 +1,20 @@
+#----------------------------------------------------------------------------------------------------------------------
+[user-service]
+
+    □ pom.xml
+		<!-- resilience4j -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+		</dependency>
+
+    □ UserServiceASImpl
+            else if(CIRCUITBREAK_TPM) {
+
+                // 써킷브레이크를 통해서 서비스를 호출한다.
+    	        log.info("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ Before call orders microservice");
+    			CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitbreaker");
+    			ordersList = circuitBreaker.run(() -> tpsSendRecvOrderService.getOrders(userId),
+    					throwable -> new ArrayList<>()); // 만약 order서비스가 비정상적이라면, new ArrayList<>()이라는 아무것도 없는 값을 리턴한다.
+    			log.info("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ After called orders microservice");
+            }
