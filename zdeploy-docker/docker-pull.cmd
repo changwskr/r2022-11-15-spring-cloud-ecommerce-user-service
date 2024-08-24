@@ -1,0 +1,1 @@
+docker pull changwskr/my-userservice:1.0
