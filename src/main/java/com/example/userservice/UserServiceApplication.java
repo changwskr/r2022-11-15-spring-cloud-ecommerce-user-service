@@ -1,5 +1,6 @@
 package com.example.userservice;
 
+import com.example.userservice.tpm.ComUtil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -22,13 +23,6 @@ public class UserServiceApplication {
 
     public static void main(String[] args) {
 
-        // 운영체제 버전
-        String osName = System.getProperty("os.name");
-        // 운영체제 버전
-        System.out.println("Operating System Name: " + osName);
-        if( osName.equals("Window")){
-
-        }
 
         SpringApplication.run(UserServiceApplication.class, args);
     }

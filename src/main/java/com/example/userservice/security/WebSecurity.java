@@ -62,22 +62,20 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers("/h2-console/**").permitAll();
         http.authorizeRequests().antMatchers("/swagger-ui/**").permitAll();
 
-
-
-
         Boolean AUTH_TYPE_01 = Boolean.FALSE; // users 서비스 허용
         Boolean AUTH_TYPE_02 = Boolean.FALSE; // 특정 IP 만 접근 허용
         Boolean AUTH_TYPE_03 = Boolean.FALSE;
-        Boolean AUTH_TYPE_04 = Boolean.TRUE;
+        Boolean AUTH_TYPE_04 = Boolean.FALSE;
 
-        String osName = System.getProperty("os.name");
         // 운영체제 버전
-        System.out.println("Operating System Name: " + osName);
-        if( osName.equals("Window")){
+        String osName = System.getProperty("os.name");
 
+        if( osName.substring(0,6).equals("Window") ){
+            AUTH_TYPE_02 = Boolean.TRUE; // 특정 IP 만 접근 허용
         }
-
-
+        else{
+            AUTH_TYPE_04 = Boolean.TRUE;
+        }
 
         if(AUTH_TYPE_01){
             log.info("■■■ AUTH_TYPE_01 - TRUE ");  // 회원가입은 성공이나, 로그인 에러
