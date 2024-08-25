@@ -1,0 +1,10 @@
+spring:
+  cloud:
+    config:
+      uri: http://127.0.0.1:8888
+
+      # 2022-11-28-2 암복호화 정보를 ecommerce.yml에서 관리한다.
+      # name: ecommerce
+
+      # 2024-08-18-01 resttemplate 연동으로 order_url 정보 추가
+      name: ecommerce
