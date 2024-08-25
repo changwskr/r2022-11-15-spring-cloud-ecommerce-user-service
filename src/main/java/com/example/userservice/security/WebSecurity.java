@@ -65,12 +65,12 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
 
         Boolean AUTH_TYPE_01 = Boolean.FALSE; // users 서비스 허용
-        Boolean AUTH_TYPE_02 = Boolean.TRUE; // 특정 IP 만 접근 허용
+        Boolean AUTH_TYPE_02 = Boolean.FALSE; // 특정 IP 만 접근 허용
         Boolean AUTH_TYPE_03 = Boolean.FALSE;
-        Boolean AUTH_TYPE_04 = Boolean.FALSE;
+        Boolean AUTH_TYPE_04 = Boolean.TRUE;
 
         if(AUTH_TYPE_01){
-            log.info("■■■ AUTH_TYPE_01 - TRUE ");
+            log.info("■■■ AUTH_TYPE_01 - TRUE ");  // 회원가입은 성공이나, 로그인 에러
             http.authorizeRequests() // 보호된 자원에 대한 접근 권한을 설정한다.
                     .antMatchers("/users/**") // 이 패턴을 모든 권한을 준다.
                     .permitAll();
@@ -89,6 +89,13 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                     .addFilter(getAuthenticationFilter()); //WebSecurity.getAuthenticationFilter() 함수를 만들어 필터작용을 한다.
         }
 
+        if(AUTH_TYPE_03){
+            log.info("■■■ AUTH_TYPE_03 - TRUE ");
+            http.authorizeRequests() // 보호된 자원에 대한 접근 권한을 설정한다.
+                    .antMatchers("/**") // 이 패턴을 모든 권한을 준다.
+                    .permitAll();
+        }
+
         if(AUTH_TYPE_04){
             log.info("■■■ AUTH_TYPE_04 - TRUE ");
             // getAuthenticationFilter()에 결려있는 필터를 적용해 주세요
@@ -96,17 +103,11 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
             http.authorizeRequests() // 보호된 리소스에 대한 접근 권한을 설정한다
                     .antMatchers("/**")
-                    .hasIpAddress("*.*.*.*") // 이 IP만 허용하고 다른 IP는 제약을 걸어보자
+                    .hasIpAddress("172.18.0.0/24") // 이 IP만 허용하고 다른 IP는 제약을 걸어보자
                     .and()
                     .addFilter(getAuthenticationFilter()); //WebSecurity.getAuthenticationFilter() 함수를 만들어 필터작용을 한다.
         }
 
-        if(AUTH_TYPE_03){
-            log.info("■■■ AUTH_TYPE_03 - TRUE ");
-            http.authorizeRequests() // 보호된 자원에 대한 접근 권한을 설정한다.
-                    .antMatchers("/**") // 이 패턴을 모든 권한을 준다.
-                    .permitAll();
-        }
 
         http.headers().frameOptions().disable();
 
