@@ -70,11 +70,15 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         // 운영체제 버전
         String osName = System.getProperty("os.name");
 
-        if( osName.substring(0,6).equals("Window") ){
+        log.info("■■■ osName-[" + osName + "]" + "[" + osName.substring(0,3).equals("Win") + "]");
+
+        if( osName.substring(0,3).equals("Win") == true ){
             AUTH_TYPE_02 = Boolean.TRUE; // 특정 IP 만 접근 허용
         }
         else{
             AUTH_TYPE_04 = Boolean.TRUE;
+            log.info("■■■ AUTH_TYPE_04-[" + AUTH_TYPE_04 + "]");
+
         }
 
         if(AUTH_TYPE_01){

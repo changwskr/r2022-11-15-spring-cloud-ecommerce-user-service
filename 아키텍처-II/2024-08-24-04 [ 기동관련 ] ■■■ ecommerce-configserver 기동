@@ -1,0 +1,33 @@
+ecommerce architecture
+#-----------------------------------------------------------------------------------------------------------------------
+[아키텍처]
+                               Service registry(유레카)                            ◆ ----- Distributed tracing(Zipkin)
+channel                           |                                               |
+Iot                               |                                               |
+Mobile    ---- API gateway -------| -------------------- USER-SERVICE ------------◆
+Browser            |              | -------------------- ORDER-SERVICE -----------◆
+                   |              | -------------------- CATALOG-SERVICE ---------◆
+                   |              |                                               |
+                   ◆---------- Config Service                                     |
+                                  |                                               |
+                                  ◆---------------------Bus(Rabbitmq)-------------◆
+                                  
+#-----------------------------------------------------------------------------------------------------------------------
+
+config-service는 두개 방식의 외부환경을 주입받는다.
+    - 하나는 local
+    - 두번째는 native
+    - 세변째는 git을 통해서
+    
+    - 그런데 하나의 환경으로 두개의 환경을 기동해야 되는 경우에는 외부에서 환경을 주입해서 기동하자
+      현재 환경을 도커 컨테이너 환경인데 이것을 윈도우 환경에서 기동해 보자
+        
+      application.yaml 파일중 spring.profiles.active=git,
+      bootstrap.yaml 파일중 encrypt.key-store.location=file:/***.jks 이렇게 도커환경에 맞추어져 있다.
+      이것을 윈도우 환경에서 기동해 보자
+      
+      환경을 외부에서 주입한다.  
+      java -jar .\target\config-service-1.0.jar ^
+            --spring.profiles.active=native ^
+            --encrypt.key-store.location="file:///C:\\Programming(23-08-15)\\zRepository\\r2022-11-17-spring-cloud-config-service\\keystore\\apiEncryptionKey.jks"
+                                 
