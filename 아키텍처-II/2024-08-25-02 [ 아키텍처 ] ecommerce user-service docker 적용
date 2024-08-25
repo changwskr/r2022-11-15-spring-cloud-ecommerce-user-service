@@ -1,0 +1,46 @@
+user-service
+#-----------------------------------------------------------------------------------------------------------------------
+[user-service 환경 구성]
+    □ application.yaml
+    □ bootstrap.yaml
+
+    □ apigateway 서비스 ip를 변경한다.
+        - http://localhost:8888/user-service/default 에 접근해서 gateway ip 확인한다.
+            이 서비스를 받기위해서는 컨테이너에 config-service가 기동되어 있어야 된다.
+            그리고 github https://github.com/changwskr/spring-cloud-config 에 환경구성이 완료되어야 된다.
+            -  "gateway.ip": "192.168.0.8",
+        - https://github.com/changwskr/spring-cloud-config 의 정보 변경한다.
+            대상파일 : ecommerce.yaml
+                참고로 user-service에서 참고하고 있는 config-정보는 bootstrap에 명시되어 있다.
+                    |spring:
+                    |  cloud:
+                    |    config:
+                    |      uri: http://127.0.0.1:8888
+                    |      name: ecommerce
+               그러므로 github.com/changwskr/spring-cloud-config 의 ecommerce.yaml파일을 수정한다.
+                - gateway ip
+                    이 정보는 docker network inspect ecommerce-network 를 통해서 확인한다.
+                    172.18.0.5
+                        | "dca5e82fc2af57b3ed5f876e198c83b5569b2aeaf65ed454525b4c15b659c5cc": {
+                        |                 "Name": "my-apigatewayservice",
+                        |                 "EndpointID": "e73580a1b161e4e3462d72e6090d3699a0de4ea761ea79bc60eab1b46959130a",
+                        |                 "MacAddress": "02:42:ac:12:00:05",
+                        |                 "IPv4Address": "172.18.0.5/16",
+                        |                 "IPv6Address": ""
+                        | } 임을 확인한다.
+        - 이제 gateway.ip : 172.18.0.5 변경한다.
+
+|
+
+    □ ------------------------------------------------------------------------------------------------------------------
+    □ Dockerfile
+        FROM openjdk:17-ea-11-jdk-slim
+        VOLUME /tmp
+        COPY user-service-1.0.jar UserService.jar
+        ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "UserService.jar"]
+    □ ------------------------------------------------------------------------------------------------------------------
+    □ docker build
+    □ docker push
+    □ docker run
+    □ ------------------------------------------------------------------------------------------------------------------
+
