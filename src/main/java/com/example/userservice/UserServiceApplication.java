@@ -21,6 +21,15 @@ public class UserServiceApplication {
 	// 여기서 등록된 빈들은 다른 객체에서 주입받아서 사용한다. IOC 좋구먼
 
     public static void main(String[] args) {
+
+        // 운영체제 버전
+        String osName = System.getProperty("os.name");
+        // 운영체제 버전
+        System.out.println("Operating System Name: " + osName);
+        if( osName.equals("Window")){
+
+        }
+
         SpringApplication.run(UserServiceApplication.class, args);
     }
 
