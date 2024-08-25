@@ -1,1 +1,1 @@
-docker pull changwskr/my-userservice:1.0
+docker pull changwskr/user-service:1.0

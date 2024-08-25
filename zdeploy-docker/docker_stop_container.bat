@@ -1,1 +1,1 @@
-docker stop my-userservice
+docker stop user-service
