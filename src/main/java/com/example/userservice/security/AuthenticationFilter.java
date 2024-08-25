@@ -79,7 +79,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                                             HttpServletResponse response,
                                             FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
-    	
+    	log.info("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■AuthenticationFilter.successfulAuthentication() ■■■ s ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
     	log.info("### - 인증이후 토큰을 생성해서 헤더에 저장한다. AuthenticationFilter.successfulAuthentication()--start");
         String userName = ((User)authResult.getPrincipal()).getUsername();
         log.info("###"+ userName + "]");
@@ -88,13 +88,19 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         UserDto userDetails = userServiceAS.getUserDetailsByEmail(userName);
 
         // 토큰을 생성한다. - userName으로 userId를 찾아서 userid로 토큰을 생성한다.
-        log.info("### - AuthenticationFilter.successfulAuthentication()--토큰 생성 요청");
+        log.info("■ AuthenticationFilter.successfulAuthentication()--토큰 생성 요청");
+        log.info("■ token.expiration_time -[" + env.getProperty("token.expiration_time") + "]");
+        log.info("■ token.secret -[" + env.getProperty("token.secret") + "]");
+
+        //=============================================================================================================
         String token = Jwts.builder()
                 .setSubject(userDetails.getUserId())
                 .setExpiration(new Date(System.currentTimeMillis() +
                         Long.parseLong(env.getProperty("token.expiration_time"))))
                 .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
                 .compact();
+        //=============================================================================================================
+        log.info("■ ---- check ");
 
         // 토큰을 헤더에 저장한다.
         log.info("### 생성된 토큰을 헤더에 저장한다. token, userid");
@@ -102,5 +108,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         response.addHeader("userId", userDetails.getUserId());
 
         log.info("### - AuthenticationFilter.successfulAuthentication()--end");
+        log.info("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■AuthenticationFilter.successfulAuthentication() ■■■ e ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
     }
 }
