@@ -31,3 +31,4 @@ build/
 
 ### VS Code ###
 .vscode/
+!/zdeploy-docker/user-service-1.0.jar
