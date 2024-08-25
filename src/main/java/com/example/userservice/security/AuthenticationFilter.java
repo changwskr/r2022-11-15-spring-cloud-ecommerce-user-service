@@ -45,8 +45,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response) throws AuthenticationException {
         try {
-        	log.info("### - AuthenticationFilter.attemptAuthentication()--start");
-        	
+            log.info("■■■ AuthenticationFilter.attemptAuthentication()--start ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
+
         	// 전달되는 스트림을 찾아서 RequestLogin 객체로 전환시킨다.
             // RequestLoginFormVO 객체내에서 id/pw에 해당되는 것을 찾는다.
             RequestLoginFormVO creds = new ObjectMapper().readValue(request.getInputStream(), RequestLoginFormVO.class);
@@ -57,7 +57,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                     new UsernamePasswordAuthenticationToken(creds.getEmail(), creds.getPassword(),   new ArrayList<>());
             // 인증작업을 요청한다.
 
-        	log.info("### - AuthenticationFilter.attemptAuthentication()--end--" + token.toString() );
+        	log.info("■ TOKEIN --" + token.toString() );
+            log.info("■■■ AuthenticationFilter.attemptAuthentication()--end ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
 
             return getAuthenticationManager().authenticate(token);
             

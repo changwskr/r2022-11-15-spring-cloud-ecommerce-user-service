@@ -47,6 +47,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
         http.csrf().disable();
 
+        log.info("■■■ WebSecurity.configure start ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
+
         // 기본 통과
         http.authorizeRequests().antMatchers("/actuator/**").permitAll();
         http.authorizeRequests().antMatchers("/health_check/**").permitAll();
@@ -62,12 +64,13 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
 
 
-        Boolean AUTH_TYPE_01 = Boolean.FALSE; // users 서비스 허용
-        Boolean AUTH_TYPE_02 = Boolean.TRUE; // 특정 IP 만 접근 허용
+        Boolean AUTH_TYPE_01 = Boolean.TRUE; // users 서비스 허용
+        Boolean AUTH_TYPE_02 = Boolean.FALSE; // 특정 IP 만 접근 허용
         Boolean AUTH_TYPE_03 = Boolean.FALSE;
         Boolean AUTH_TYPE_04 = Boolean.FALSE;
 
         if(AUTH_TYPE_01){
+            log.info("■■■ AUTH_TYPE_01 - TRUE ");
             http.authorizeRequests() // 보호된 자원에 대한 접근 권한을 설정한다.
                     .antMatchers("/users/**") // 이 패턴을 모든 권한을 준다.
                     .permitAll();
@@ -75,6 +78,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
 
         if(AUTH_TYPE_02){
+            log.info("■■■ AUTH_TYPE_02 - TRUE ");
             // 결론 127.0.0.1 인 IP만을 인증할것이고. 추가로 getAuthenticationFilter()에 결려있는 필터를 적용해 주세요
             // 192.168.0.8로 하니깐 에러가 발생하는데 127로 하니 에러는 발생하지 않네
 
@@ -85,7 +89,20 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                     .addFilter(getAuthenticationFilter()); //WebSecurity.getAuthenticationFilter() 함수를 만들어 필터작용을 한다.
         }
 
+        if(AUTH_TYPE_04){
+            log.info("■■■ AUTH_TYPE_02 - TRUE ");
+            // getAuthenticationFilter()에 결려있는 필터를 적용해 주세요
+            // 192.168.0.8로 하니깐 에러가 발생하는데 127로 하니 에러는 발생하지 않네
+
+            http.authorizeRequests() // 보호된 리소스에 대한 접근 권한을 설정한다
+                    .antMatchers("/**")
+                    .hasIpAddress("172.*.*.*") // 이 IP만 허용하고 다른 IP는 제약을 걸어보자
+                    .and()
+                    .addFilter(getAuthenticationFilter()); //WebSecurity.getAuthenticationFilter() 함수를 만들어 필터작용을 한다.
+        }
+
         if(AUTH_TYPE_03){
+            log.info("■■■ AUTH_TYPE_03 - TRUE ");
             http.authorizeRequests() // 보호된 자원에 대한 접근 권한을 설정한다.
                     .antMatchers("/**") // 이 패턴을 모든 권한을 준다.
                     .permitAll();
@@ -93,7 +110,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
         http.headers().frameOptions().disable();
 
-        log.info("### - WebSecurity.configure()--end");
+        log.info("■■■ WebSecurity.configure end ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
     }
 
     protected void configure_T01(HttpSecurity http) throws Exception {
