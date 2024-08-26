@@ -1,0 +1,12 @@
+
+
+                              (인증불필요)               (인증필요)
+AuthenticationFilterNew ---> | POST /login ---> JWT --- /users
+  -method                    |
+   attemptAuthentication     | POST /login ---> JWT --- /users/{userid} ---> (Open Feign Rest Template)
+   successfulAuthentication  |                  (토큰)                              ---> /order-service/{userid}/orders
+                        ---> | POST /users
+                        ---> | GET/POST /actuator
+                        ---> | GET /h2-console
+                        ---> | GET /welcome
+                        ---> | GET /health-check
