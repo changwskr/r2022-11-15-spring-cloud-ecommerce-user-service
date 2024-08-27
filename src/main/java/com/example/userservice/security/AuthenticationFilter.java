@@ -56,11 +56,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             UsernamePasswordAuthenticationToken token =
                     new UsernamePasswordAuthenticationToken(creds.getEmail(), creds.getPassword(),   new ArrayList<>());
             // 인증작업을 요청한다.
-
+            log.info("■ request 정보에 있는 email과 password 정보를 기준으로 토큰을 가지고 온다.");
         	log.info("■ TOKEIN --" + token.toString() );
             log.info("■■■ AuthenticationFilter.attemptAuthentication()--end ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
 
-            return getAuthenticationManager().authenticate(token);
+            Authentication authentication = getAuthenticationManager().authenticate(token);
+            log.info("권한이 있는지 확인한다." + authentication.toString());
+            return authentication;
             
         } catch(IOException e) {
         	log.error("### - AuthenticationFilter.attemptAuthentication()--exception");
