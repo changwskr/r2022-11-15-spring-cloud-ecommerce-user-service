@@ -79,6 +79,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                                             HttpServletResponse response,
                                             FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
+
+        log.info("로그인이 성공했을 경우 successfulAuthenfication이 호출된다.");
+
     	log.info("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■AuthenticationFilter.successfulAuthentication() ■■■ s ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
     	log.info("### - 인증이후 토큰을 생성해서 헤더에 저장한다. AuthenticationFilter.successfulAuthentication()--start");
         String userName = ((User)authResult.getPrincipal()).getUsername();
@@ -87,6 +90,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         log.info("### - AuthenticationFilter.successfulAuthentication()--userService.getUserDetailsByName() 호출");
         UserDto userDetails = userServiceAS.getUserDetailsByEmail(userName);
 
+        log.info("token.secret의 값은 user-service가 기동시 config-service를 통해서 주입받는다. 어떤 환경정보를 읽어야 하는지는 bootstrap.yml에 명시된 정보를 받는다.");
         // 토큰을 생성한다. - userName으로 userId를 찾아서 userid로 토큰을 생성한다.
         log.info("■ AuthenticationFilter.successfulAuthentication()--토큰 생성 요청");
         log.info("■ token.expiration_time -[" + env.getProperty("token.expiration_time") + "]");
